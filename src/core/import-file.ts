@@ -14,6 +14,7 @@ import type { ChunkInput, PageInput, PageType } from './types.ts';
 import { computeEffectiveDate } from './effective-date.ts';
 import { MARKDOWN_CHUNKER_VERSION } from './chunkers/recursive.ts';
 import { logSlugFallback } from './audit-slug-fallback.ts';
+import { trackMemoryWriteEUCost } from './eu-tracker.ts';
 
 /**
  * v0.20.0 Cathedral II Layer 8 D2 — markdown fence extraction helper.
@@ -399,6 +400,11 @@ export async function importFromContent(
       } catch { /* same reason — silent skip */ }
     }
   });
+
+  // ── EU cost tracking (fire-and-forget) ──────────────────────────────
+  // Track memory write cost for successful imports (not for skipped/unchanged).
+  trackMemoryWriteEUCost('gbrain', 'gbrain_memory_write').catch(() => {});
+  // ── End EU cost tracking ───────────────────────────────────────────
 
   return { slug, status: 'imported', chunks: chunks.length, parsedPage };
 }

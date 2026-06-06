@@ -24,6 +24,7 @@ import { stripTakesFence } from './takes-fence.ts';
 import { stripFactsFence } from './facts-fence.ts';
 import { bumpLastRetrievedAt } from './last-retrieved.ts';
 import { CJK_SLUG_CHARS } from './cjk.ts';
+import { buildMemoryTree, getMemoryTreeStats, pinMemoryTreeNodes } from './memory-tree.ts';
 import * as db from './db.ts';
 import { VERSION } from '../version.ts';
 import {
@@ -1018,11 +1019,16 @@ const delete_page: Operation = {
   description: 'Soft-delete a page. The row is hidden from search and from get_page/list_pages, but is recoverable via restore_page within 72h. The autopilot purge phase hard-deletes after the recovery window. Pass include_deleted: true to get_page to verify the soft-delete landed.',
   params: {
     slug: { type: 'string', required: true },
+    _confirmed: { type: 'boolean', description: 'L2: Explicit confirmation required for destructive operations. Must be true to proceed.' },
   },
   mutating: true,
   scope: 'write',
   handler: async (ctx, p) => {
     const slug = p.slug as string;
+    // L2 deny path: destructive operation requires explicit confirmation
+    if (!p._confirmed) {
+      throw new OperationError('permission_denied', 'L2 operation delete_page requires _confirmed=true');
+    }
     if (ctx.dryRun) return { dry_run: true, action: 'soft_delete_page', slug };
     // v0.31.8 (D7): thread ctx.sourceId so multi-source brains soft-delete the
     // intended row instead of always targeting (default, slug).
@@ -3347,6 +3353,41 @@ const forget_fact: Operation = {
   },
 };
 
+const memory_tree: Operation = {
+  name: 'memory_tree',
+  description: 'Build, pin, and inspect a rooted memory tree spanning entities, pages, and hot facts.',
+  params: {
+    action: { type: 'string', required: true, description: 'search | pin | stats', enum: ['search', 'pin', 'stats'] },
+    query: { type: 'string', description: 'Search query used to build the tree.' },
+    limit: { type: 'number', description: 'Max number of pages/facts to include in search mode.' },
+    node_ids: {
+      type: 'array',
+      description: 'Node ids to persist as pinned memory anchors.',
+      items: { type: 'string' },
+    },
+  },
+  scope: 'read',
+  handler: async (ctx, p) => {
+    const args = ((p ?? (ctx as OperationContext & { args?: Record<string, unknown> }).args) ?? {}) as Record<string, unknown>;
+    const action = String(args.action ?? 'search');
+    if (action === 'pin') {
+      const nodeIds = Array.isArray(args.node_ids) ? args.node_ids.filter((value): value is string => typeof value === 'string') : [];
+      const pinned = await pinMemoryTreeNodes(ctx.engine, nodeIds);
+      return { action, pinned };
+    }
+    if (action === 'stats') {
+      return { action, ...(await getMemoryTreeStats(ctx.engine)) };
+    }
+    const query = String(args.query ?? '');
+    const limit = typeof args.limit === 'number' ? args.limit : 10;
+    return {
+      action: 'search',
+      query,
+      tree: await buildMemoryTree(ctx.engine, query, limit),
+    };
+  },
+};
+
 /**
  * Parse a `since` parameter into a Date. Accepts ISO 8601, plain duration
  * shorthand ("8 hours ago", "3 days ago", "30m", "1h", "2d", "7d"), or
@@ -3780,7 +3821,7 @@ export const operations: Operation[] = [
   // v0.29: Salience + anomalies + recent transcripts
   get_recent_salience, find_anomalies, get_recent_transcripts,
   // v0.31: hot memory (facts table)
-  extract_facts, recall, forget_fact,
+  extract_facts, recall, forget_fact, memory_tree,
   // v0.32.6: contradiction probe MCP surface (M3)
   find_contradictions,
   // v0.33: expertise + relationship-proximity routing

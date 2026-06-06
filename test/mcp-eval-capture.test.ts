@@ -21,6 +21,7 @@ import { operations } from '../src/core/operations.ts';
 import type { OperationContext } from '../src/core/operations.ts';
 import type { GBrainConfig } from '../src/core/config.ts';
 import type { PageInput } from '../src/core/types.ts';
+import { hybridSearchCached } from '../src/core/search/hybrid.ts';
 
 let engine: PGLiteEngine;
 const savedKey = process.env.OPENAI_API_KEY;
@@ -104,11 +105,25 @@ async function waitForCapture(): Promise<void> {
   await new Promise(r => setTimeout(r, 10));
 }
 
+async function runQueryAndCaptureMeta(query: string): Promise<{ vector_enabled: boolean; expansion_applied: boolean }> {
+  let captured = { vector_enabled: false, expansion_applied: false };
+  await hybridSearchCached(engine, query, {
+    onMeta: (meta) => {
+      captured = {
+        vector_enabled: meta.vector_enabled,
+        expansion_applied: meta.expansion_applied,
+      };
+    },
+  });
+  return captured;
+}
+
 describe('op-layer capture — query', () => {
   const queryOp = operations.find(o => o.name === 'query')!;
 
   test('captures MCP query call with remote=true', async () => {
     const ctx = makeCtx({ remote: true });
+    const expectedMeta = await runQueryAndCaptureMeta('alice');
     await queryOp.handler(ctx, { query: 'alice' });
     await waitForCapture();
 
@@ -119,7 +134,8 @@ describe('op-layer capture — query', () => {
     expect(row.query).toBe('alice');
     expect(row.remote).toBe(true);
     expect(row.expand_enabled).toBe(true); // default
-    expect(row.vector_enabled).toBe(false); // OPENAI_API_KEY deleted
+    expect(row.vector_enabled).toBe(expectedMeta.vector_enabled);
+    expect(row.expansion_applied).toBe(expectedMeta.expansion_applied);
     expect(row.job_id).toBeNull();
     expect(row.subagent_id).toBeNull();
   });

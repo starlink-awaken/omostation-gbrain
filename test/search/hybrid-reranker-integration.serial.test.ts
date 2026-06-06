@@ -40,6 +40,16 @@ function stubEmbeddings(): void {
 }
 
 beforeAll(async () => {
+  process.env.GBRAIN_HOME = '/tmp/nonexistent-gbrain-home';
+  process.env.AI_EMBEDDING_MODEL = 'openai:text-embedding-3-large';
+  process.env.AI_EMBEDDING_DIMENSIONS = String(DIMS);
+  configureGateway({
+    embedding_model: 'openai:text-embedding-3-large',
+    embedding_dimensions: DIMS,
+    env: { OPENAI_API_KEY: 'sk-test' },
+  });
+  stubEmbeddings();
+
   engine = new PGLiteEngine();
   await engine.connect({});
   await engine.initSchema();
@@ -73,12 +83,6 @@ beforeAll(async () => {
   // that's fine — vectorLists is `[[]]` (length 1, not 0), so the
   // keyword-only branch is skipped and the main path runs RRF + dedup +
   // reranker + budget.
-  configureGateway({
-    embedding_model: 'openai:text-embedding-3-large',
-    embedding_dimensions: DIMS,
-    env: { OPENAI_API_KEY: 'sk-test' },
-  });
-  stubEmbeddings();
 });
 
 afterAll(async () => {

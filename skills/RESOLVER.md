@@ -26,6 +26,8 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 | "validate frontmatter", "check frontmatter", "fix frontmatter", "frontmatter audit", "brain lint" | `skills/frontmatter-guard/SKILL.md` |
 | "what search mode", "is my cache hot", "tune my retrieval", "compare search modes", "clear search overrides" | `gbrain search modes/stats/tune` directly. See `skills/conventions/search-modes.md` |
 | "eval results", "search benchmark", "haters-immune methodology", "regression check on retrieval" | `gbrain eval run-all` / `gbrain eval compare`. See `docs/eval/SEARCH_MODE_METHODOLOGY.md` |
+| "track my deep work", "deep work session", "focus session", "pomodoro" | `skills/deepwork-tracker/SKILL.md` |
+| "moltbook", "knowledge molt", "molt my knowledge" | `skills/moltbook/SKILL.md` |
 
 ## Content & media ingestion
 
@@ -127,5 +129,7 @@ These apply to ALL brain-writing skills:
 | "crawl my archive", "find gold in my archive", "archive crawler", "scan my dropbox for", "mine my old files for" | `skills/archive-crawler/SKILL.md` |
 | "verify this academic claim", "check this study", "academic verify", "validate citation", "is this study real" | `skills/academic-verify/SKILL.md` |
 | "make pdf from brain", "brain pdf", "convert brain page to pdf", "publish this page as pdf", "export brain page" | `skills/brain-pdf/SKILL.md` |
-| "voice note", "ingest this voice memo", "transcribe and file", "voice note ingest", "save this audio note" | `skills/voice-note-ingest/SKILL.md` |
-
+|| "voice note", "ingest this voice memo", "transcribe and file", "voice note ingest", "save this audio note" | `skills/voice-note-ingest/SKILL.md` |
+|| "deep work", "track deep work", "focus session", "deep work session", "deepwork session" | deepwork-tracker |
+|| "moltbook", "molt book", "use moltbook" | moltbook |
+|

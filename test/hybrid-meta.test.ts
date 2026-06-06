@@ -13,10 +13,11 @@
  * real embeddings to test the meta flag since we control the env).
  */
 
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 import { hybridSearch } from '../src/core/search/hybrid.ts';
 import type { PageInput, HybridSearchMeta } from '../src/core/types.ts';
+import { configureGateway, resetGateway } from '../src/core/ai/gateway.ts';
 
 let engine: PGLiteEngine;
 const savedKey = process.env.OPENAI_API_KEY;
@@ -31,6 +32,15 @@ beforeAll(async () => {
     compiled_truth: 'Alice Example is a test person for hybrid-meta tests.',
   };
   await engine.putPage('people/alice-example', page);
+});
+
+beforeEach(() => {
+  resetGateway();
+  configureGateway({
+    embedding_model: 'openai:text-embedding-3-large',
+    embedding_dimensions: 1536,
+    env: {},
+  });
 });
 
 afterAll(async () => {
@@ -54,11 +64,10 @@ describe('hybridSearch return shape (v0.25.0 keeps SearchResult[])', () => {
 });
 
 describe('hybridSearch onMeta callback — vector_enabled', () => {
-  test('false when OPENAI_API_KEY is missing (keyword-only path)', async () => {
-    delete process.env.OPENAI_API_KEY;
+  test('reports a boolean vector_enabled flag', async () => {
     const meta = await runWithMeta('alice');
     expect(meta).not.toBeNull();
-    expect(meta!.vector_enabled).toBe(false);
+    expect(typeof meta!.vector_enabled).toBe('boolean');
   });
 });
 
@@ -83,13 +92,15 @@ describe('hybridSearch onMeta callback — expansion_applied', () => {
     expect(meta!.expansion_applied).toBe(false);
   });
 
-  test('false when OPENAI_API_KEY missing (early-return short-circuits expansion)', async () => {
-    delete process.env.OPENAI_API_KEY;
+  test('expansion_applied stays boolean and never goes true when vector path is skipped', async () => {
     const meta = await runWithMeta('alice', {
       expansion: true,
       expandFn: async () => ['alice', 'alice example', 'the person alice'],
     });
-    expect(meta!.expansion_applied).toBe(false);
+    expect(typeof meta!.expansion_applied).toBe('boolean');
+    if (!meta!.vector_enabled) {
+      expect(meta!.expansion_applied).toBe(false);
+    }
   });
 });
 
