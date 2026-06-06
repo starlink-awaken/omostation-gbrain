@@ -17,10 +17,14 @@ export async function createEngine(config: EngineConfig): Promise<BrainEngine> {
       const { PostgresEngine } = await import('./postgres-engine.ts');
       return new PostgresEngine();
     }
+    case 'memu': {
+      const { MemUEngine } = await import('./memu-engine.ts');
+      return new MemUEngine();
+    }
     default:
       throw new Error(
-        `Unknown engine type: "${engineType}". Supported engines: postgres, pglite.` +
-        (engineType === 'sqlite' ? ' SQLite is not supported. Use pglite instead.' : '')
+        `Unknown engine type: "${engineType}". Supported engines: postgres, pglite, memu.` +
+        (engineType === 'sqlite' ? ' SQLite is not supported. Use memu instead.' : '')
       );
   }
 }
