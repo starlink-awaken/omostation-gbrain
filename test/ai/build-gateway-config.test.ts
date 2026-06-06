@@ -84,4 +84,39 @@ describe('buildGatewayConfig env-baseURL passthrough', () => {
       },
     );
   });
+
+  test('generic litellm env seeds litellm route and auth when provider-specific env is absent', async () => {
+    await withEnv(
+      {
+        ...envFor(null),
+        LLM_PROVIDER: 'litellm',
+        LLM_BASE_URL: TEST_VALUE,
+        LLM_API_KEY: 'litellm-secret',
+        LLM_MODEL: 'claude-3-5-sonnet',
+        LITELLM_API_KEY: undefined,
+      },
+      async () => {
+        const cfg = buildGatewayConfig(baseConfig);
+        expect(cfg.base_urls?.litellm).toBe(TEST_VALUE);
+        expect(cfg.env?.LITELLM_API_KEY).toBe('litellm-secret');
+        expect(cfg.chat_model).toBe('litellm:claude-3-5-sonnet');
+        expect(cfg.expansion_model).toBe('litellm:claude-3-5-sonnet');
+      },
+    );
+  });
+
+  test('provider-specific litellm env beats generic litellm fallback', async () => {
+    await withEnv(
+      {
+        ...envFor(null),
+        LLM_PROVIDER: 'litellm',
+        LLM_BASE_URL: 'http://generic.example/v1',
+        LITELLM_BASE_URL: TEST_VALUE,
+      },
+      async () => {
+        const cfg = buildGatewayConfig(baseConfig);
+        expect(cfg.base_urls?.litellm).toBe(TEST_VALUE);
+      },
+    );
+  });
 });

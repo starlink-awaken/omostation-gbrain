@@ -129,3 +129,50 @@ describe('loadConfig env database URL precedence', () => {
     }
   });
 });
+
+describe('loadConfig generic LLM env fallback', () => {
+  test('LLM_PROVIDER + LLM_MODEL seed chat and expansion when GBRAIN-specific env is unset', async () => {
+    const home = mkdtempSync(join(tmpdir(), 'gbrain-config-llm-env-'));
+    try {
+      await withEnv(
+        {
+          GBRAIN_HOME: home,
+          DATABASE_URL: 'postgres://llm:test@gbrain.test:5432/db',
+          GBRAIN_CHAT_MODEL: undefined,
+          GBRAIN_EXPANSION_MODEL: undefined,
+          LLM_PROVIDER: 'litellm',
+          LLM_MODEL: 'claude-3-5-sonnet',
+          LLM_BASE_URL: 'http://127.0.0.1:4000/v1',
+        },
+        () => {
+          const cfg = loadConfig();
+          expect(cfg?.chat_model).toBe('litellm:claude-3-5-sonnet');
+          expect(cfg?.expansion_model).toBe('litellm:claude-3-5-sonnet');
+        },
+      );
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  test('GBRAIN_CHAT_MODEL beats generic LLM env fallback', async () => {
+    const home = mkdtempSync(join(tmpdir(), 'gbrain-config-llm-env-'));
+    try {
+      await withEnv(
+        {
+          GBRAIN_HOME: home,
+          DATABASE_URL: 'postgres://llm:test@gbrain.test:5432/db',
+          GBRAIN_CHAT_MODEL: 'anthropic:claude-haiku-4-5-20251001',
+          LLM_PROVIDER: 'litellm',
+          LLM_MODEL: 'claude-3-5-sonnet',
+        },
+        () => {
+          const cfg = loadConfig();
+          expect(cfg?.chat_model).toBe('anthropic:claude-haiku-4-5-20251001');
+        },
+      );
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+});

@@ -1468,13 +1468,22 @@ export function buildGatewayConfig(c: GBrainConfig): AIGatewayConfig {
   if (process.env.LMSTUDIO_BASE_URL) envBaseUrls['lmstudio'] = process.env.LMSTUDIO_BASE_URL;
   if (process.env.LITELLM_BASE_URL) envBaseUrls['litellm'] = process.env.LITELLM_BASE_URL;
   if (process.env.OPENROUTER_BASE_URL) envBaseUrls['openrouter'] = process.env.OPENROUTER_BASE_URL;
+  const genericProvider = process.env.LLM_PROVIDER?.trim();
+  const genericModel = process.env.LLM_MODEL?.trim();
+  const genericModelRef = genericProvider && genericModel ? `${genericProvider}:${genericModel}` : undefined;
+  if (genericProvider === 'litellm' && !envBaseUrls['litellm'] && process.env.LLM_BASE_URL) {
+    envBaseUrls['litellm'] = process.env.LLM_BASE_URL;
+  }
+  if (genericProvider === 'litellm' && process.env.LLM_API_KEY && !process.env.LITELLM_API_KEY) {
+    envFromConfig.LITELLM_API_KEY = process.env.LLM_API_KEY;
+  }
 
   return {
     embedding_model: c.embedding_model,
     embedding_dimensions: c.embedding_dimensions,
     embedding_multimodal_model: c.embedding_multimodal_model,
-    expansion_model: c.expansion_model,
-    chat_model: c.chat_model,
+    expansion_model: c.expansion_model ?? genericModelRef,
+    chat_model: c.chat_model ?? genericModelRef,
     chat_fallback_chain: c.chat_fallback_chain,
     base_urls: { ...envBaseUrls, ...(c.provider_base_urls ?? {}) }, // config wins over env
     env: { ...envFromConfig, ...process.env }, // process.env wins

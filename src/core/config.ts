@@ -239,6 +239,9 @@ export function loadConfig(): GBrainConfig | null {
 
   // Try env vars
   const dbUrl = process.env.GBRAIN_DATABASE_URL || process.env.DATABASE_URL;
+  const genericProvider = process.env.LLM_PROVIDER?.trim();
+  const genericModel = process.env.LLM_MODEL?.trim();
+  const genericModelRef = genericProvider && genericModel ? `${genericProvider}:${genericModel}` : undefined;
 
   if (!fileConfig && !dbUrl) return null;
 
@@ -263,8 +266,16 @@ export function loadConfig(): GBrainConfig | null {
     ...(process.env.ZEROENTROPY_API_KEY ? { zeroentropy_api_key: process.env.ZEROENTROPY_API_KEY } : {}),
     ...(process.env.GBRAIN_EMBEDDING_MODEL ? { embedding_model: process.env.GBRAIN_EMBEDDING_MODEL } : {}),
     ...(process.env.GBRAIN_EMBEDDING_DIMENSIONS ? { embedding_dimensions: parseInt(process.env.GBRAIN_EMBEDDING_DIMENSIONS, 10) } : {}),
-    ...(process.env.GBRAIN_EXPANSION_MODEL ? { expansion_model: process.env.GBRAIN_EXPANSION_MODEL } : {}),
-    ...(process.env.GBRAIN_CHAT_MODEL ? { chat_model: process.env.GBRAIN_CHAT_MODEL } : {}),
+    ...(process.env.GBRAIN_EXPANSION_MODEL
+      ? { expansion_model: process.env.GBRAIN_EXPANSION_MODEL }
+      : genericModelRef
+        ? { expansion_model: genericModelRef }
+        : {}),
+    ...(process.env.GBRAIN_CHAT_MODEL
+      ? { chat_model: process.env.GBRAIN_CHAT_MODEL }
+      : genericModelRef
+        ? { chat_model: genericModelRef }
+        : {}),
     ...(process.env.GBRAIN_CHAT_FALLBACK_CHAIN
       ? { chat_fallback_chain: process.env.GBRAIN_CHAT_FALLBACK_CHAIN.split(',').map(s => s.trim()).filter(Boolean) }
       : {}),
