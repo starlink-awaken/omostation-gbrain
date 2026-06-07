@@ -114,3 +114,16 @@ use generic placeholders (`alice-example`, `acme-example`, `fund-a`).
 
 If you are a fork, regenerate `llms.txt` + `llms-full.txt` with your own URL base before
 publishing: `LLMS_REPO_BASE=https://raw.githubusercontent.com/your-org/your-fork/main bun run build:llms`.
+
+## BOS Services
+
+gbrain 通过 Agora Service Mesh 对外提供的 BOS URI 服务。
+
+- `bos://memory/gbrain/query` — Postgres 知识库查询 (mcp_proxy)
+  - 输入: `{"sql": "str"}`
+  - 输出: `{"rows": [...]}`
+- `bos://memory/gbrain/search` — 全文搜索 (mcp_proxy)  
+  - 输入: `{"query": "str", "limit": 10}`
+  - 输出: `{"results": [...]}`
+- `bos://memory/gbrain/sync` — 知识同步 (mcp_proxy)
+  - 输入: `{"source": "kos|vault"}`

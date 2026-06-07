@@ -8,7 +8,7 @@
  * (same endpoint used by kairon/eu-pricing/EULedger)
  */
 
-const DEFAULT_ECONOMY_ENDPOINT = 'http://localhost:7430';
+const DEFAULT_ECONOMY_ENDPOINT = process.env.SHAREDBRAIN_ENDPOINT || process.env.ECONOMY_ENDPOINT || 'http://localhost:7430';
 
 /**
  * Fire-and-forget EU cost tracking for a memory write operation.
