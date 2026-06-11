@@ -18,8 +18,8 @@
  * disk-full or audit-dir-permission issue must not stall the cycle.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { z } from 'zod';
+import { AppendOnlyLog, ZTimestampSchema } from '../append-only-log.ts';
 import { isoWeekFilename, resolveAuditDir } from '../audit-week-file.ts';
 
 export type PhantomOutcome =
@@ -30,16 +30,30 @@ export type PhantomOutcome =
   | 'not_phantom_has_residue'
   | 'pass_skipped_lock_busy';
 
-export interface PhantomAuditEvent {
-  ts: string;
-  phantom_slug?: string;
-  canonical_slug?: string;
-  outcome: PhantomOutcome;
-  fact_count?: number;
-  source_id: string;
-  reason?: string;
-  candidates?: Array<{ slug: string; connection_count: number }>;
-}
+export const PhantomAuditEventSchema = ZTimestampSchema.extend({
+  phantom_slug: z.string().optional(),
+  canonical_slug: z.string().optional(),
+  outcome: z.enum([
+    'redirected',
+    'ambiguous',
+    'drift',
+    'no_canonical',
+    'not_phantom_has_residue',
+    'pass_skipped_lock_busy',
+  ]),
+  fact_count: z.number().optional(),
+  source_id: z.string(),
+  reason: z.string().optional(),
+  candidates: z.array(z.object({ slug: z.string(), connection_count: z.number() })).optional(),
+});
+export interface PhantomAuditEvent extends z.infer<typeof PhantomAuditEventSchema> {}
+
+const phantomLog = (): AppendOnlyLog =>
+  new AppendOnlyLog({
+    filePath: resolveAuditDir() + '/phantoms-{YYYY-Www}.jsonl',
+    prefix: 'phantoms',
+    schema: PhantomAuditEventSchema,
+  });
 
 /** ISO-week-rotated filename: `phantoms-YYYY-Www.jsonl`. Delegates to
  *  `src/core/audit-week-file.ts`. */
@@ -64,11 +78,8 @@ export function logPhantomEvent(event: Omit<PhantomAuditEvent, 'ts'> & { ts?: st
     ...(event.reason !== undefined ? { reason: event.reason } : {}),
     ...(event.candidates !== undefined ? { candidates: event.candidates } : {}),
   };
-  const dir = resolveAuditDir();
-  const file = path.join(dir, computePhantomAuditFilename());
   try {
-    fs.mkdirSync(dir, { recursive: true });
-    fs.appendFileSync(file, JSON.stringify(record) + '\n', { encoding: 'utf8' });
+    phantomLog().append(record);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     process.stderr.write(`[gbrain] phantom audit write failed (${msg}); cycle continues\n`);
@@ -84,7 +95,6 @@ export function logPhantomEvent(event: Omit<PhantomAuditEvent, 'ts'> & { ts?: st
  * informational and shouldn't block any consumer.
  */
 export function readRecentPhantomEvents(days = 7, now: Date = new Date()): PhantomAuditEvent[] {
-  const dir = resolveAuditDir();
   const cutoff = now.getTime() - days * 86400000;
   const out: PhantomAuditEvent[] = [];
   const filenames = [
@@ -92,22 +102,14 @@ export function readRecentPhantomEvents(days = 7, now: Date = new Date()): Phant
     computePhantomAuditFilename(new Date(now.getTime() - 7 * 86400000)),
   ];
   for (const filename of filenames) {
-    const file = path.join(dir, filename);
-    let content: string;
-    try {
-      content = fs.readFileSync(file, 'utf8');
-    } catch {
-      continue;
-    }
-    for (const line of content.split('\n')) {
-      if (line.length === 0) continue;
-      try {
-        const ev = JSON.parse(line) as PhantomAuditEvent;
-        const ts = Date.parse(ev.ts);
-        if (Number.isFinite(ts) && ts >= cutoff) out.push(ev);
-      } catch {
-        // Corrupt row — skip.
-      }
+    const fullPath = `${resolveAuditDir()}/${filename}`;
+    const records = new AppendOnlyLog({
+      filePath: fullPath,
+      schema: PhantomAuditEventSchema,
+    }).readAllSync<PhantomAuditEvent>();
+    for (const ev of records) {
+      const ts = Date.parse(ev.ts);
+      if (Number.isFinite(ts) && ts >= cutoff) out.push(ev);
     }
   }
   return out;

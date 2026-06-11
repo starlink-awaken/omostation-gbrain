@@ -20,8 +20,8 @@
  * Best-effort writes. Write failures go to stderr but search continues.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { z } from 'zod';
+import { AppendOnlyLog, ZTimestampSchema } from './append-only-log.ts';
 import { resolveAuditDir } from './minions/handlers/shell-audit.ts';
 
 /** Stable error-classification union; matches RerankError.reason. */
@@ -33,26 +33,33 @@ export type RerankFailureReason =
   | 'payload_too_large'
   | 'unknown';
 
-export interface RerankFailureEvent {
-  ts: string;
+export const RerankFailureEventSchema = ZTimestampSchema.extend({
   /** Provider:model — e.g. `'zeroentropyai:zerank-2'`. */
-  model: string;
+  model: z.string(),
   /** Classified failure mode (see RerankFailureReason). */
-  reason: RerankFailureReason;
+  reason: z.enum(['auth', 'rate_limit', 'network', 'timeout', 'payload_too_large', 'unknown']),
   /** SHA-256 prefix of the rerank query (8 hex chars). Privacy: never log
    *  query text. Lets doctor dedupe repeat failures on the same query. */
-  query_hash: string;
+  query_hash: z.string(),
   /** Number of documents that were being reranked when failure fired. */
-  doc_count: number;
+  doc_count: z.number(),
   /**
    * Truncated upstream error message (first 200 chars). Useful for
    * diagnosing flaky providers without leaking PII; query text is hashed
    * separately so this string never carries it.
    */
-  error_summary: string;
+  error_summary: z.string(),
   /** Always 'warn' — matches RerankError's "all failures degrade UX". */
-  severity: 'warn';
-}
+  severity: z.literal('warn'),
+});
+export interface RerankFailureEvent extends z.infer<typeof RerankFailureEventSchema> {}
+
+const rerankLog = (): AppendOnlyLog =>
+  new AppendOnlyLog({
+    filePath: resolveAuditDir() + '/rerank-failures-{YYYY-Www}.jsonl',
+    prefix: 'rerank-failures',
+    schema: RerankFailureEventSchema,
+  });
 
 /** ISO-week-rotated filename: `rerank-failures-YYYY-Www.jsonl`. */
 export function computeRerankAuditFilename(now: Date = new Date()): string {
@@ -88,11 +95,8 @@ export function logRerankFailure(event: Omit<RerankFailureEvent, 'ts' | 'severit
     ...event,
     error_summary: truncateErrorSummary(event.error_summary),
   };
-  const dir = resolveAuditDir();
-  const file = path.join(dir, computeRerankAuditFilename());
   try {
-    fs.mkdirSync(dir, { recursive: true });
-    fs.appendFileSync(file, JSON.stringify(row) + '\n', { encoding: 'utf8' });
+    rerankLog().append(row);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     process.stderr.write(`[gbrain] rerank-failure audit write failed (${msg}); search continues\n`);
@@ -105,7 +109,6 @@ export function logRerankFailure(event: Omit<RerankFailureEvent, 'ts' | 'severit
  * are skipped silently — the audit trail is informational.
  */
 export function readRecentRerankFailures(days = 7, now: Date = new Date()): RerankFailureEvent[] {
-  const dir = resolveAuditDir();
   const cutoff = now.getTime() - days * 86400000;
   const out: RerankFailureEvent[] = [];
   // Walk the current + previous ISO week so a 7-day window straddling
@@ -115,22 +118,14 @@ export function readRecentRerankFailures(days = 7, now: Date = new Date()): Rera
     computeRerankAuditFilename(new Date(now.getTime() - 7 * 86400000)),
   ];
   for (const filename of filenames) {
-    const file = path.join(dir, filename);
-    let content: string;
-    try {
-      content = fs.readFileSync(file, 'utf8');
-    } catch {
-      continue;
-    }
-    for (const line of content.split('\n')) {
-      if (line.length === 0) continue;
-      try {
-        const ev = JSON.parse(line) as RerankFailureEvent;
-        const ts = Date.parse(ev.ts);
-        if (Number.isFinite(ts) && ts >= cutoff) out.push(ev);
-      } catch {
-        // Corrupt row — skip.
-      }
+    const fullPath = `${resolveAuditDir()}/${filename}`;
+    const records = new AppendOnlyLog({
+      filePath: fullPath,
+      schema: RerankFailureEventSchema,
+    }).readAllSync<RerankFailureEvent>();
+    for (const ev of records) {
+      const ts = Date.parse(ev.ts);
+      if (Number.isFinite(ts) && ts >= cutoff) out.push(ev);
     }
   }
   return out;

@@ -18,21 +18,28 @@
  * Best-effort writes. Write failures go to stderr but the import continues.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { z } from 'zod';
+import { AppendOnlyLog, ZTimestampSchema } from './append-only-log.ts';
 import { isoWeekFilename, resolveAuditDir } from './audit-week-file.ts';
 
-export interface SlugFallbackAuditEvent {
-  ts: string;
+export const SlugFallbackAuditEventSchema = ZTimestampSchema.extend({
   /** Resolved slug (the frontmatter slug that overrode the empty path slug). */
-  slug: string;
+  slug: z.string(),
   /** Repo-relative path that produced an empty slugifyPath(). */
-  source_path: string;
+  source_path: z.string(),
   /** Always 'info' — keeps the schema explicit for future severity tiers. */
-  severity: 'info';
+  severity: z.literal('info'),
   /** Stable code consumed by `gbrain doctor`'s slug_fallback_audit check. */
-  code: 'SLUG_FALLBACK_FRONTMATTER';
-}
+  code: z.literal('SLUG_FALLBACK_FRONTMATTER'),
+});
+export type SlugFallbackAuditEvent = z.infer<typeof SlugFallbackAuditEventSchema>;
+
+const slugFallbackLog = (): AppendOnlyLog =>
+  new AppendOnlyLog({
+    filePath: resolveAuditDir() + '/slug-fallback-{YYYY-Www}.jsonl',
+    prefix: 'slug-fallback',
+    schema: SlugFallbackAuditEventSchema,
+  });
 
 /** ISO-week-rotated filename: `slug-fallback-YYYY-Www.jsonl`. Delegates to
  *  `src/core/audit-week-file.ts`. */
@@ -56,11 +63,8 @@ export function logSlugFallback(slug: string, sourcePath: string): void {
     severity: 'info',
     code: 'SLUG_FALLBACK_FRONTMATTER',
   };
-  const dir = resolveAuditDir();
-  const file = path.join(dir, computeSlugFallbackAuditFilename());
   try {
-    fs.mkdirSync(dir, { recursive: true });
-    fs.appendFileSync(file, JSON.stringify(event) + '\n', { encoding: 'utf8' });
+    slugFallbackLog().append(event);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     process.stderr.write(`[gbrain] slug-fallback audit write failed (${msg}); import continues\n`);
@@ -74,32 +78,23 @@ export function logSlugFallback(slug: string, sourcePath: string): void {
  * informational and shouldn't block doctor.
  */
 export function readRecentSlugFallbacks(days = 7, now: Date = new Date()): SlugFallbackAuditEvent[] {
-  const dir = resolveAuditDir();
   const cutoff = now.getTime() - days * 86400000;
   const out: SlugFallbackAuditEvent[] = [];
   // Walk the current + previous ISO week so a 7-day window straddling
   // Monday-midnight stays covered.
-  const filenames = [
+  const prefixes = [
     computeSlugFallbackAuditFilename(now),
     computeSlugFallbackAuditFilename(new Date(now.getTime() - 7 * 86400000)),
   ];
-  for (const filename of filenames) {
-    const file = path.join(dir, filename);
-    let content: string;
-    try {
-      content = fs.readFileSync(file, 'utf8');
-    } catch {
-      continue;
-    }
-    for (const line of content.split('\n')) {
-      if (line.length === 0) continue;
-      try {
-        const ev = JSON.parse(line) as SlugFallbackAuditEvent;
-        const ts = Date.parse(ev.ts);
-        if (Number.isFinite(ts) && ts >= cutoff) out.push(ev);
-      } catch {
-        // Corrupt row — skip.
-      }
+  for (const filename of prefixes) {
+    const fullPath = `${resolveAuditDir()}/${filename}`;
+    const records = new AppendOnlyLog({
+      filePath: fullPath,
+      schema: SlugFallbackAuditEventSchema,
+    }).readAllSync<SlugFallbackAuditEvent>();
+    for (const ev of records) {
+      const ts = Date.parse(ev.ts);
+      if (Number.isFinite(ts) && ts >= cutoff) out.push(ev);
     }
   }
   return out;

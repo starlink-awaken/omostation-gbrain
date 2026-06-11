@@ -13,22 +13,29 @@
  * operators to put secrets in `env:` instead of embedding them in the command line.
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import { z } from 'zod';
+import { AppendOnlyLog, ZTimestampSchema } from '../../append-only-log.ts';
 import { isoWeekFilename, resolveAuditDir as _sharedResolveAuditDir } from '../../audit-week-file.ts';
 
-export interface ShellAuditEvent {
-  ts: string;
-  caller: 'cli' | 'mcp';
-  remote: boolean;
-  job_id: number;
-  cwd: string;
-  cmd_display?: string;        // first 80 chars of cmd; may contain inline tokens
-  argv_display?: string[];     // each arg truncated individually to preserve separation
+export const ShellAuditEventSchema = ZTimestampSchema.extend({
+  caller: z.enum(['cli', 'mcp']),
+  remote: z.boolean(),
+  job_id: z.number(),
+  cwd: z.string(),
+  cmd_display: z.string().optional(),        // first 80 chars of cmd; may contain inline tokens
+  argv_display: z.array(z.string()).optional(), // each arg truncated individually to preserve separation
   /** Names of inheritable secrets requested via `inherit:` (v0.35.8.0).
    *  Names only — values never appear here. */
-  inherit?: string[];
-}
+  inherit: z.array(z.string()).optional(),
+});
+export type ShellAuditEvent = z.infer<typeof ShellAuditEventSchema>;
+
+const shellLog = (): AppendOnlyLog =>
+  new AppendOnlyLog({
+    filePath: resolveAuditDir() + '/shell-jobs-{YYYY-Www}.jsonl',
+    prefix: 'shell-jobs',
+    schema: ShellAuditEventSchema,
+  });
 
 /** Compute `shell-jobs-YYYY-Www.jsonl`. Delegates to the shared helper in
  *  `src/core/audit-week-file.ts` — Year-boundary edges (2027-01-01 → W53 of
@@ -45,14 +52,9 @@ export function resolveAuditDir(): string {
 }
 
 export function logShellSubmission(event: Omit<ShellAuditEvent, 'ts'>): void {
-  const dir = resolveAuditDir();
-  const filename = computeAuditFilename();
-  const fullPath = path.join(dir, filename);
-  const line = JSON.stringify({ ...event, ts: new Date().toISOString() }) + '\n';
-
+  const fullEvent: ShellAuditEvent = { ...event, ts: new Date().toISOString() };
   try {
-    fs.mkdirSync(dir, { recursive: true });
-    fs.appendFileSync(fullPath, line, { encoding: 'utf8' });
+    shellLog().append(fullEvent);
   } catch (err) {
     // Best-effort: log to stderr and keep going. A disk-full or EACCES attacker
     // can silently disable this trail, which is why CHANGELOG calls it an

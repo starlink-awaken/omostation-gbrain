@@ -30,10 +30,12 @@
 
 import { mkdirSync, appendFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { z } from 'zod';
 import { gbrainPath } from '../config.ts';
 import { ANTHROPIC_PRICING, type ModelPricing } from '../anthropic-pricing.ts';
 import { EMBEDDING_PRICING, lookupEmbeddingPrice } from '../embedding-pricing.ts';
 import { isoWeekFilename, resolveAuditDir } from '../audit-week-file.ts';
+import { AppendOnlyLog, ZTimestampSchema } from '../append-only-log.ts';
 
 export type BudgetKind = 'chat' | 'embed' | 'rerank';
 
@@ -105,14 +107,57 @@ export function _resetBudgetTrackerWarningsForTest(): void {
   _unpricedWarnings.clear();
 }
 
+// ── Audit log（AppendOnlyLog）─────────────────────────────────────────────────
+// v0.37.x — BudgetTracker audit rows 走 AppendOnlyLog（R50 接入）。
+// Schema 自由形式：所有 5 种事件共享同一 shape（schema_version + ts + event + 上下文）
+// 旧 BudgetAuditEvent 类型升级为 zod schema，由 AppendOnlyLog 写前校验。
+
+export const BudgetAuditEventSchema = ZTimestampSchema.extend({
+  schema_version: z.literal(1),
+  event: z.enum([
+    'reserve',
+    'reserve_unpriced',
+    'reserve_denied',
+    'record',
+    'record_unpriced',
+    'runtime_denied',
+  ]),
+  label: z.string(),
+  kind: z.enum(['chat', 'embed', 'rerank']).optional(),
+  model: z.string().optional(),
+  sub_label: z.string().optional(),
+  estimated_input_tokens: z.number().optional(),
+  max_output_tokens: z.number().optional(),
+  projected_cost_usd: z.number().optional(),
+  cumulative_cost_usd: z.number().optional(),
+  max_cost_usd: z.number().nullable().optional(),
+  input_tokens: z.number().optional(),
+  output_tokens: z.number().optional(),
+  embedding_dims: z.number().nullable().optional(),
+  actual_cost_usd: z.number().optional(),
+  elapsed_ms: z.number().optional(),
+  max_runtime_ms: z.number().optional(),
+});
+export type BudgetAuditEvent = z.infer<typeof BudgetAuditEventSchema>;
+
+const budgetLog = (auditPath?: string): AppendOnlyLog => {
+  const path =
+    auditPath ??
+    `${resolveAuditDir()}/${isoWeekFilename('budget')}`;
+  return new AppendOnlyLog({
+    filePath: path,
+    schema: BudgetAuditEventSchema,
+  });
+};
+
 /**
  * Best-effort JSONL audit append. Failure never gates the run; matches the
- * shell-audit / phantom-audit posture.
+ * shell-audit / phantom-audit posture. AppendOnlyLog.append 内部 try/catch
+ * 失败时不抛——失败由 try/catch 兜底。
  */
-function appendAuditLine(path: string, entry: object): void {
+function appendAuditLine(auditPath: string | undefined, entry: BudgetAuditEvent): void {
   try {
-    mkdirSync(dirname(path), { recursive: true });
-    appendFileSync(path, JSON.stringify(entry) + '\n');
+    budgetLog(auditPath).append(entry);
   } catch {
     // swallow — audit failures must not block the LLM call
   }

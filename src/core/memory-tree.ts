@@ -1,8 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 
+import { z } from 'zod';
 import type { BrainEngine, FactRow } from './engine.ts';
 import { gbrainPath } from './config.ts';
 import type { SearchResult } from './types.ts';
+import { AppendOnlyLog, ZTimestampSchema } from './append-only-log.ts';
 
 const PINS_CONFIG_KEY = 'memory_tree.pins';
 const PINS_PATH = gbrainPath('memory-tree-pins.json');
@@ -21,6 +23,29 @@ function unique<T>(values: T[]): T[] {
   return Array.from(new Set(values));
 }
 
+// ── Pin log（AppendOnlyLog）────────────────────────────────────────────────────
+// v0.37.x — pin 状态从单一 writeFileSync 迁移到 AppendOnlyLog。
+// 历史单一文件 PINS_PATH 保留读取（向后兼容已存在的 pin 数据），
+// 新增 pin 写入 pin-log-{YYYY-Www}.jsonl，O_APPEND 原子追加。
+//
+// R50 P0：原 writePinFile 存在竞争风险——多进程 pin 时最后一个 writeFileSync
+// 覆盖前面的，pin 状态会丢失。AppendOnlyLog 用 O_APPEND 原子追加，
+// 读端从完整 JSONL 重建（union of all log lines）。
+
+const PinEventSchema = ZTimestampSchema.extend({
+  event: z.literal('pin'),
+  node_ids: z.array(z.string()),
+});
+type PinEvent = z.infer<typeof PinEventSchema>;
+
+function pinLog(): AppendOnlyLog {
+  return new AppendOnlyLog({
+    filePath: gbrainPath('audit/memory-tree-pins-{YYYY-Www}.jsonl'),
+    prefix: 'memory-tree-pins',
+    schema: PinEventSchema,
+  });
+}
+
 function readPinFile(): string[] {
   if (!existsSync(PINS_PATH)) return [];
   try {
@@ -31,9 +56,9 @@ function readPinFile(): string[] {
   }
 }
 
-function writePinFile(nodeIds: string[]) {
-  mkdirSync(gbrainPath(), { recursive: true });
-  writeFileSync(PINS_PATH, JSON.stringify(unique(nodeIds), null, 2), 'utf8');
+/** 从 PINS_PATH（旧）+ pin-log-{YYYY-Www}.jsonl（新，O_APPEND 原子）合并所有 pin */
+function readPinsFromLog(): string[] {
+  return pinLog().readAllSync<PinEvent>().flatMap(e => e.node_ids);
 }
 
 function entityId(slug: string) {
@@ -117,20 +142,31 @@ export async function buildMemoryTree(engine: BrainEngine, query: string, limit 
 }
 
 export async function readPinnedNodeIds(engine: BrainEngine): Promise<string[]> {
+  // v0.37.x — 先读新 log（O_APPEND 原子），再读旧 PINS_PATH（向后兼容）
+  const fromLog = readPinsFromLog();
+  if (fromLog.length > 0) return unique(fromLog);
+  // log 为空：检查 DB config（跨进程持久化）
   const stored = await engine.getConfig(PINS_CONFIG_KEY);
-  if (!stored) return readPinFile();
-  try {
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === 'string') : [];
-  } catch {
-    return readPinFile();
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((value): value is string => typeof value === 'string');
+      }
+    } catch {
+      /* fall through to file */
+    }
   }
+  // 兜底：旧 PINS_PATH（pre-AppendOnlyLog 写过的）
+  return readPinFile();
 }
 
 export async function pinMemoryTreeNodes(engine: BrainEngine, nodeIds: string[]) {
+  // 1. DB config（跨进程单一真相）
   const merged = unique([...(await readPinnedNodeIds(engine)), ...nodeIds]);
   await engine.setConfig(PINS_CONFIG_KEY, JSON.stringify(merged));
-  writePinFile(merged);
+  // 2. AppendOnlyLog 追加（O_APPEND 原子，R50 P0 修复竞争风险）
+  pinLog().append({ ts: new Date().toISOString(), event: 'pin', node_ids: nodeIds });
   return merged;
 }
 
