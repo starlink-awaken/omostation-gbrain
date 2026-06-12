@@ -1,0 +1,17 @@
+#!/bin/bash
+# Pre-commit hook
+set -euo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+REPO_NAME=$(basename "$REPO_ROOT")
+
+echo "🔍 Pre-commit: $REPO_NAME"
+
+# 检查是否有待提交的文件
+STAGED_FILES=$(git diff --cached --name-only 2>/dev/null | wc -l | tr -d ' ')
+if [ "$STAGED_FILES" -eq 0 ]; then
+  echo "⚠️ 无待提交文件"
+  exit 0
+fi
+
+echo "✅ Pre-commit check complete"
