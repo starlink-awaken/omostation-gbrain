@@ -104,6 +104,9 @@ CREATE TABLE IF NOT EXISTS pages (
   -- (NOT inside engine methods — internal callers must not pollute the
   -- signal). NULL = never retrieved (LSD prioritizes these first).
   last_retrieved_at     TIMESTAMPTZ,
+  -- v0.38.0 MemTheta (Phase 1): access metrics and confidence.
+  access_count          INT NOT NULL DEFAULT 0,
+  confidence_score      REAL NOT NULL DEFAULT 1.0,
   CONSTRAINT pages_source_slug_key UNIQUE (source_id, slug)
 );
 
