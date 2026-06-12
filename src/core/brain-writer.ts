@@ -17,7 +17,7 @@
  */
 
 import { createHash } from 'crypto';
-import { existsSync, readFileSync, readdirSync, copyFileSync, writeFileSync, mkdirSync, lstatSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, copyFileSync, writeFileSync, mkdirSync, lstatSync, renameSync } from 'fs';
 import { join, relative, resolve, dirname, basename, isAbsolute } from 'path';
 import type { BrainEngine } from './engine.ts';
 import type { ProgressReporter } from './progress.ts';
@@ -361,7 +361,9 @@ export function writeBrainPage(
   } else {
     mkdirSync(dirname(filePath), { recursive: true });
   }
-  writeFileSync(filePath, toWrite, 'utf8');
+  const tmpPath = `${filePath}.${Date.now()}-${Math.random().toString(36).slice(2, 8)}.tmp`;
+  writeFileSync(tmpPath, toWrite, 'utf8');
+  renameSync(tmpPath, filePath);
   return { fixes, backupPath };
 }
 
