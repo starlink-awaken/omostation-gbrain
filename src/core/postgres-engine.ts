@@ -1254,7 +1254,7 @@ export class PostgresEngine implements BrainEngine {
     const rawQuery = `
       WITH ranked_chunks AS (
         SELECT
-          p.slug, p.id as page_id, p.title, p.type, p.source_id,
+          p.slug, p.id as page_id, p.title, p.type, p.source_id, p.access_count, p.confidence_score,
           p.effective_date, p.effective_date_source,
           cc.id as chunk_id, cc.chunk_index, cc.chunk_text, cc.chunk_source,
           ts_rank(cc.search_vector, websearch_to_tsquery('english', $1)) * ${sourceFactorCase} AS score
@@ -1396,7 +1396,7 @@ export class PostgresEngine implements BrainEngine {
 
     const rawQuery = `
       SELECT
-        p.slug, p.id as page_id, p.title, p.type, p.source_id,
+        p.slug, p.id as page_id, p.title, p.type, p.source_id, p.access_count, p.confidence_score,
         p.effective_date, p.effective_date_source,
         cc.id as chunk_id, cc.chunk_index, cc.chunk_text, cc.chunk_source,
         ts_rank(cc.search_vector, websearch_to_tsquery('english', $1)) * ${sourceFactorCase} AS score,
@@ -1546,7 +1546,7 @@ export class PostgresEngine implements BrainEngine {
     const rawQuery = `
       WITH hnsw_candidates AS (
         SELECT
-          p.slug, p.id as page_id, p.title, p.type, p.source_id,
+          p.slug, p.id as page_id, p.title, p.type, p.source_id, p.access_count, p.confidence_score,
           p.effective_date, p.effective_date_source,
           cc.id as chunk_id, cc.chunk_index, cc.chunk_text, cc.chunk_source,
           1 - (cc.${col} <=> ${castSql}) AS raw_score

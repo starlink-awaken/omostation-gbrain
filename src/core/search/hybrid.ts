@@ -89,6 +89,31 @@ export function applyBacklinkBoost(
 }
 
 /**
+ * eCOS Phase 1.5 MemTheta Boost
+ * Applied AFTER cosine re-score. Multiplies score by a factor composed of:
+ * - confidence_score (0.0 to 1.0)
+ * - access_count (log scale similar to backlinks)
+ */
+export function applyMemThetaBoost(
+  results: SearchResult[],
+  floorThreshold?: number,
+): void {
+  for (const r of results) {
+    if (!Number.isFinite(r.score)) continue;
+    if (floorThreshold !== undefined && r.score < floorThreshold) continue;
+    
+    let factor = 1.0;
+    if (r.confidence_score !== undefined && r.confidence_score > 0) {
+      factor += 0.2 * r.confidence_score; // up to +20%
+    }
+    if (r.access_count !== undefined && r.access_count > 0) {
+      factor += 0.05 * Math.log(1 + r.access_count); // log scale frequency
+    }
+    r.score *= factor;
+  }
+}
+
+/**
  * v0.35.6.0 — floor-ratio threshold computation.
  *
  * Returns the absolute score floor below which boost stages skip a result.
@@ -269,6 +294,9 @@ export async function runPostFusionStages(
       // Non-fatal; preserves the existing pre-v0.29.1 contract.
     }
   }
+
+  // MemTheta Stage (eCOS Phase 1.5 Dual-Track Indexing)
+  applyMemThetaBoost(results, floorThreshold);
 
   // Composite refs for the orthogonal axes (multi-source isolation).
   const refs = Array.from(

@@ -474,6 +474,8 @@ export interface SearchResult {
   chunk_index: number;
   score: number;
   stale: boolean;
+  access_count?: number;
+  confidence_score?: number;
   /**
    * v0.36 (cross-modal wave): the chunk's modality discriminator from
    * content_chunks.modality. 'text' for the existing text-embedding rows,
