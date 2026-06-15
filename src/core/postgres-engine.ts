@@ -356,6 +356,13 @@ export class PostgresEngine implements BrainEngine {
       sources_archived_exists: boolean;
       sources_archived_at_exists: boolean;
       sources_archive_expires_at_exists: boolean;
+      pages_last_retrieved_at_exists: boolean;
+      pages_access_count_exists: boolean;
+      pages_confidence_score_exists: boolean;
+      pages_ingested_via_exists: boolean;
+      pages_ingested_at_exists: boolean;
+      pages_source_uri_exists: boolean;
+      pages_source_kind_exists: boolean;
     }[]>`
       SELECT
         EXISTS (SELECT 1 FROM information_schema.tables
@@ -417,6 +424,10 @@ export class PostgresEngine implements BrainEngine {
         EXISTS (SELECT 1 FROM information_schema.columns
                 WHERE table_schema = current_schema() AND table_name = 'pages' AND column_name = 'last_retrieved_at') AS pages_last_retrieved_at_exists,
         EXISTS (SELECT 1 FROM information_schema.columns
+                WHERE table_schema = current_schema() AND table_name = 'pages' AND column_name = 'access_count') AS pages_access_count_exists,
+        EXISTS (SELECT 1 FROM information_schema.columns
+                WHERE table_schema = current_schema() AND table_name = 'pages' AND column_name = 'confidence_score') AS pages_confidence_score_exists,
+        EXISTS (SELECT 1 FROM information_schema.columns
                 WHERE table_schema = current_schema() AND table_name = 'pages' AND column_name = 'ingested_via') AS pages_ingested_via_exists,
         EXISTS (SELECT 1 FROM information_schema.columns
                 WHERE table_schema = current_schema() AND table_name = 'pages' AND column_name = 'ingested_at') AS pages_ingested_at_exists,
@@ -476,6 +487,9 @@ export class PostgresEngine implements BrainEngine {
     // adds it before SCHEMA_SQL replay creates the index. v79 runs later
     // via runMigrations and is idempotent.
     const needsPagesLastRetrievedAt = probe.pages_exists && !(probe as { pages_last_retrieved_at_exists?: boolean }).pages_last_retrieved_at_exists;
+    const needsPagesMemTheta = probe.pages_exists
+      && (!(probe as { pages_access_count_exists?: boolean }).pages_access_count_exists
+          || !(probe as { pages_confidence_score_exists?: boolean }).pages_confidence_score_exists);
     // v0.38.0 (v80): provenance columns. Not referenced by any SCHEMA_SQL
     // index/FK today; bootstrap exists for the column-only forward-
     // reference class defense-in-depth.
@@ -497,6 +511,7 @@ export class PostgresEngine implements BrainEngine {
         && !needsIngestLogSourceId && !needsFilesBootstrap
         && !needsOauthClientsBootstrap && !needsSourcesArchive
         && !needsPagesLastRetrievedAt
+        && !needsPagesMemTheta
         && !needsPagesProvenance) return;
 
     console.log('  Pre-v0.21 brain detected, applying forward-reference bootstrap');
@@ -684,6 +699,15 @@ export class PostgresEngine implements BrainEngine {
       // later via runMigrations and is idempotent.
       await conn.unsafe(`
         ALTER TABLE pages ADD COLUMN IF NOT EXISTS last_retrieved_at TIMESTAMPTZ;
+      `);
+    }
+
+    if (needsPagesMemTheta) {
+      // v89 (pages_memtheta_columns): keep pre-column brains readable once
+      // search begins selecting these ranking attributes directly.
+      await conn.unsafe(`
+        ALTER TABLE pages ADD COLUMN IF NOT EXISTS access_count INT NOT NULL DEFAULT 0;
+        ALTER TABLE pages ADD COLUMN IF NOT EXISTS confidence_score REAL NOT NULL DEFAULT 1.0;
       `);
     }
 

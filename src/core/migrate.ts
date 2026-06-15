@@ -4014,6 +4014,19 @@ export const MIGRATIONS: Migration[] = [
         ADD COLUMN IF NOT EXISTS schema_pack_per_source JSONB NULL;
     `,
   },
+  {
+    version: 89,
+    name: 'pages_memtheta_columns',
+    // Search ranking now projects pages.access_count + pages.confidence_score
+    // directly. Older brains missing the additive columns must self-heal.
+    idempotent: true,
+    sql: `
+      ALTER TABLE pages
+        ADD COLUMN IF NOT EXISTS access_count INT NOT NULL DEFAULT 0;
+      ALTER TABLE pages
+        ADD COLUMN IF NOT EXISTS confidence_score REAL NOT NULL DEFAULT 1.0;
+    `,
+  },
 ];
 
 export const LATEST_VERSION = MIGRATIONS.length > 0

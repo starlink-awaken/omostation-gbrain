@@ -326,6 +326,10 @@ export class PGLiteEngine implements BrainEngine {
         EXISTS (SELECT 1 FROM information_schema.columns
                 WHERE table_schema='public' AND table_name='pages' AND column_name='last_retrieved_at') AS pages_last_retrieved_at_exists,
         EXISTS (SELECT 1 FROM information_schema.columns
+                WHERE table_schema='public' AND table_name='pages' AND column_name='access_count') AS pages_access_count_exists,
+        EXISTS (SELECT 1 FROM information_schema.columns
+                WHERE table_schema='public' AND table_name='pages' AND column_name='confidence_score') AS pages_confidence_score_exists,
+        EXISTS (SELECT 1 FROM information_schema.columns
                 WHERE table_schema='public' AND table_name='pages' AND column_name='ingested_via') AS pages_ingested_via_exists,
         EXISTS (SELECT 1 FROM information_schema.columns
                 WHERE table_schema='public' AND table_name='pages' AND column_name='ingested_at') AS pages_ingested_at_exists,
@@ -364,6 +368,8 @@ export class PGLiteEngine implements BrainEngine {
       sources_archived_at_exists: boolean;
       sources_archive_expires_at_exists: boolean;
       pages_last_retrieved_at_exists: boolean;
+      pages_access_count_exists: boolean;
+      pages_confidence_score_exists: boolean;
       pages_ingested_via_exists: boolean;
       pages_ingested_at_exists: boolean;
       pages_source_uri_exists: boolean;
@@ -413,6 +419,10 @@ export class PGLiteEngine implements BrainEngine {
     // v0.37.0 (v79): pages_last_retrieved_at_idx in PGLITE_SCHEMA_SQL
     // references last_retrieved_at. Pre-v79 brains crash without the column.
     const needsPagesLastRetrievedAt = probe.pages_exists && !probe.pages_last_retrieved_at_exists;
+    // v0.38.x MemTheta: search queries project pages.access_count +
+    // pages.confidence_score directly. Add both before reads hit old brains.
+    const needsPagesMemTheta = probe.pages_exists
+      && (!probe.pages_access_count_exists || !probe.pages_confidence_score_exists);
     // v0.38.0 (v80): provenance columns on pages. Not referenced by any
     // SCHEMA_SQL index or FK today, but added defense-in-depth so future
     // schema work that references them doesn't wedge pre-v80 brains.
@@ -429,6 +439,7 @@ export class PGLiteEngine implements BrainEngine {
         && !needsPagesRecency && !needsIngestLogSourceId
         && !needsFilesBootstrap && !needsOauthClientsBootstrap
         && !needsSourcesArchive && !needsPagesLastRetrievedAt
+        && !needsPagesMemTheta
         && !needsPagesProvenance) return;
 
     console.log('  Pre-v0.21 brain detected, applying forward-reference bootstrap');
@@ -616,6 +627,15 @@ export class PGLiteEngine implements BrainEngine {
       // later via runMigrations and is idempotent.
       await this.db.exec(`
         ALTER TABLE pages ADD COLUMN IF NOT EXISTS last_retrieved_at TIMESTAMPTZ;
+      `);
+    }
+
+    if (needsPagesMemTheta) {
+      // v89 (pages_memtheta_columns): keep old brains queryable once ranking
+      // starts reading these columns.
+      await this.db.exec(`
+        ALTER TABLE pages ADD COLUMN IF NOT EXISTS access_count INT NOT NULL DEFAULT 0;
+        ALTER TABLE pages ADD COLUMN IF NOT EXISTS confidence_score REAL NOT NULL DEFAULT 1.0;
       `);
     }
 

@@ -85,6 +85,10 @@ CREATE TABLE IF NOT EXISTS pages (
   -- v0.37.0 (migration v79): real stale-page signal for gbrain lsd
   -- (mirrors src/schema.sql). NULL = never retrieved.
   last_retrieved_at     TIMESTAMPTZ,
+  -- v0.38.0 MemTheta (Phase 1): access metrics and confidence
+  -- (mirrors src/schema.sql).
+  access_count          INT NOT NULL DEFAULT 0,
+  confidence_score      REAL NOT NULL DEFAULT 1.0,
   CONSTRAINT pages_source_slug_key UNIQUE (source_id, slug)
 );
 
