@@ -117,13 +117,12 @@ publishing: `LLMS_REPO_BASE=https://raw.githubusercontent.com/your-org/your-fork
 
 ## BOS Services
 
-gbrain 通过 Agora Service Mesh 对外提供的 BOS URI 服务。
+gbrain 作为高性能 Postgres 知识引擎，通过 Agora Service Mesh 提供以下 BOS URI 服务。
 
-- `bos://memory/gbrain/query` — Postgres 知识库查询 (mcp_proxy)
+- `bos://memory/gbrain/query` — Postgres 结构化查询 (mcp_proxy)
   - 输入: `{"sql": "str"}`
-  - 输出: `{"rows": [...]}`
-- `bos://memory/gbrain/search` — 全文搜索 (mcp_proxy)  
+- `bos://memory/gbrain/search` — 全文检索 (mcp_proxy)  
   - 输入: `{"query": "str", "limit": 10}`
-  - 输出: `{"results": [...]}`
-- `bos://memory/gbrain/sync` — 知识同步 (mcp_proxy)
+- `bos://memory/gbrain/sync` — 知识库同步 (mcp_proxy)
   - 输入: `{"source": "kos|vault"}`
+
