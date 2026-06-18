@@ -3,7 +3,8 @@
 > **Layer**: L2 引擎面  
 > **Role**: TypeScript 知识数据库 / Postgres 混合 RAG / 知识图谱  
 > **Stack**: TypeScript, Bun, Postgres 17 + pgvector, PGLite WASM  
-> **Health**: ~9700 tests, ~99.6% pass
+> **Health**: See local CI and runtime probes
+> **SSOT**: 运行时健康、测试规模、MCP 能力计数以本项目 CI、本地探针和 workspace governance SSOT 为准
 >
 > 系统全景参见：[`docs/ARCHITECTURE-DIAGRAM.md`](../docs/ARCHITECTURE-DIAGRAM.md)
 
