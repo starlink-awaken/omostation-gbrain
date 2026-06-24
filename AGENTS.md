@@ -126,3 +126,12 @@ gbrain 作为高性能 Postgres 知识引擎，通过 Agora Service Mesh 提供�
 - `bos://memory/gbrain/sync` — 知识库同步 (mcp_proxy)
   - 输入: `{"source": "kos|vault"}`
 
+
+## Workspace-Wide Governance (2026-06-24)
+
+This project follows the workspace-level governance conventions documented in the root `AGENTS.md`:
+
+- **Agent Mutation Protocol**: Any autonomous agent/cron/daemon that modifies workspace state must emit `agent_mutation_intent`, avoid direct file I/O to `.omo/`/`spaces/`, and commit immediately. See `.omo/standards/agent-mutation-protocol.md` for the full protocol.
+- **SSOT Guardian**: Run `python3 bin/ssot-guardian.py` from the workspace root before committing to detect task-count, current-wave, submodule-pointer, or direct-omo-io drift.
+- **direct-omo-io**: Scripts must route writes to `.omo/` through `omo CLI`, `projects/omo` core, or `projects/c2g` ingress — never via raw `open()/mkdir()/write_text()`.
+- **Submodule Governance**: Commit changes inside the submodule first, then bump the root-repo pointer; `git submodule status` with a `+` prefix indicates pending drift.
