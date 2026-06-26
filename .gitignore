@@ -31,3 +31,5 @@ coverage/
 
 # ── Local OMC runtime state ──
 .omc/
+*.tmp
+__pycache__/
