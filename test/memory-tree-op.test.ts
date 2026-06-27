@@ -42,10 +42,10 @@ beforeEach(async () => {
 describe('memory_tree operation', () => {
   test('search builds a rooted tree with page and fact nodes', async () => {
     const op = operationsByName.memory_tree;
-    const result = await op.handler({
-      args: { action: 'search', query: 'memory', limit: 5 },
-      engine,
-    } as any);
+    const result = await op.handler(
+      { engine } as any,
+      { action: 'search', query: 'memory', limit: 5 },
+    ) as any;
 
     expect(result.action).toBe('search');
     expect(result.tree.root.label).toBe('memory');
@@ -55,10 +55,10 @@ describe('memory_tree operation', () => {
 
   test('pin persists node ids into config', async () => {
     const op = operationsByName.memory_tree;
-    const pinResult = await op.handler({
-      args: { action: 'pin', node_ids: ['entity:gbrain', 'page:memory/gbrain-tree'] },
-      engine,
-    } as any);
+    const pinResult = await op.handler(
+      { engine } as any,
+      { action: 'pin', node_ids: ['entity:gbrain', 'page:memory/gbrain-tree'] },
+    ) as any;
 
     expect(pinResult.pinned).toEqual(['entity:gbrain', 'page:memory/gbrain-tree']);
     const stored = await engine.getConfig('memory_tree.pins');
@@ -68,10 +68,10 @@ describe('memory_tree operation', () => {
   test('stats reports pinned count and totals', async () => {
     await engine.setConfig('memory_tree.pins', JSON.stringify(['entity:gbrain']));
     const op = operationsByName.memory_tree;
-    const stats = await op.handler({
-      args: { action: 'stats' },
-      engine,
-    } as any);
+    const stats = await op.handler(
+      { engine } as any,
+      { action: 'stats' },
+    ) as any;
 
     expect(stats.action).toBe('stats');
     expect(stats.totals.facts).toBeGreaterThanOrEqual(2);
