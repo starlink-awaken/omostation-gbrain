@@ -16,6 +16,8 @@ import type { CliOptions } from './core/cli-options.ts';
 import { callRemoteTool, RemoteMcpError, unpackToolResult } from './core/mcp-client.ts';
 import { maybePromptForUpgrade } from './core/thin-client-upgrade-prompt.ts';
 import { VERSION } from './version.ts';
+import { printOpHelp, printHelp } from "./core/cli-help.ts";
+import { printIdentityBannerBestEffort } from "./core/cli-identity.ts";
 
 // Build CLI name -> operation lookup
 const cliOps = new Map<string, Operation>();
@@ -63,7 +65,7 @@ async function main() {
   let command = args[0];
 
   if (!command || command === '--help' || command === '-h') {
-    printHelp();
+    printHelp(cliOps);
     return;
   }
 
@@ -339,96 +341,6 @@ async function runThinClientRouted(
 // command runs normally. Banner is observability, not load-bearing.
 // ============================================================================
 
-export interface BrainIdentity {
-  version: string;
-  engine: 'postgres' | 'pglite';
-  page_count: number;
-  chunk_count: number;
-  last_sync_iso: string | null;
-}
-
-interface CachedIdentity {
-  identity: BrainIdentity;
-  cached_at_ms: number;
-}
-
-const IDENTITY_TTL_MS = 60_000;
-const identityCache = new Map<string, CachedIdentity>();
-
-/** Test-only escape hatch — clears the in-memory cache between test runs. */
-export function _clearIdentityCacheForTest(): void {
-  identityCache.clear();
-}
-
-export function bannerSuppressed(cliOpts: CliOptions): boolean {
-  if (cliOpts.quiet) return true;
-  if (process.env.GBRAIN_NO_BANNER === '1') return true;
-  // Non-TTY default is suppressed (clean pipes); explicit env-flag overrides.
-  if (!process.stderr.isTTY && process.env.GBRAIN_BANNER !== '1') return true;
-  return false;
-}
-
-function formatPageCount(n: number): string {
-  if (n >= 1000) {
-    const k = (n / 1000).toFixed(n >= 100_000 ? 0 : 1);
-    return `${k}k`;
-  }
-  return String(n);
-}
-
-function formatBanner(mcpUrl: string, id: BrainIdentity): string {
-  const host = mcpUrl.replace(/^https?:\/\//, '').split('/')[0];
-  const counts = `brain: ${formatPageCount(id.page_count)} pages, ${formatPageCount(id.chunk_count)} chunks`;
-  return `[thin-client → ${host} · ${counts} · v${id.version}]`;
-}
-
-async function fetchIdentity(
-  cfg: GBrainConfig,
-  signal: AbortSignal,
-): Promise<BrainIdentity> {
-  // 2s timeout for the banner fetch — must not delay the underlying command.
-  const raw = await callRemoteTool(cfg, 'get_brain_identity', {}, {
-    timeoutMs: 2000,
-    signal,
-  });
-  const id = unpackToolResult<BrainIdentity>(raw);
-  return id;
-}
-
-async function printIdentityBannerBestEffort(
-  cfg: GBrainConfig,
-  cliOpts: CliOptions,
-  signal: AbortSignal,
-): Promise<void> {
-  if (bannerSuppressed(cliOpts)) return;
-  const mcpUrl = cfg.remote_mcp?.mcp_url;
-  if (!mcpUrl) return;
-
-  // Cache lookup keyed by mcp_url so switching hosts via `gbrain init`
-  // invalidates cleanly even within a long-lived process.
-  const cached = identityCache.get(mcpUrl);
-  if (cached && Date.now() - cached.cached_at_ms < IDENTITY_TTL_MS) {
-    process.stderr.write(formatBanner(mcpUrl, cached.identity) + '\n');
-    // v0.31.11: detect remote-version drift, prompt user to upgrade.
-    // bannerIsSuppressed=false here — the early return above guaranteed it.
-    await maybePromptForUpgrade(cfg, cached.identity, cliOpts, false);
-    return;
-  }
-
-  // Cache miss — fetch. Failure is non-fatal: banner is observability,
-  // never load-bearing for the underlying command.
-  try {
-    const id = await fetchIdentity(cfg, signal);
-    identityCache.set(mcpUrl, { identity: id, cached_at_ms: Date.now() });
-    process.stderr.write(formatBanner(mcpUrl, id) + '\n');
-    // v0.31.11: detect remote-version drift, prompt user to upgrade.
-    await maybePromptForUpgrade(cfg, id, cliOpts, false);
-  } catch {
-    // Swallow. Banner suppressed; main command continues. The CDX-4
-    // hardened callRemoteTool will surface the same error class on the
-    // actual command call if the host is genuinely unreachable.
-  }
-}
 
 /**
  * v0.27.1: shared transform for `gbrain query --image <path>` (and any future
@@ -1576,158 +1488,6 @@ async function connectEngine(opts?: { probeOnly?: boolean }): Promise<BrainEngin
   return engine;
 }
 
-function printOpHelp(op: Operation) {
-  const positional = (op.cliHints?.positional || []).map(p => `<${p}>`).join(' ');
-  const name = op.cliHints?.name || op.name;
-  console.log(`Usage: gbrain ${name} ${positional} [options]\n`);
-  console.log(op.description + '\n');
-  const entries = Object.entries(op.params);
-  if (entries.length > 0) {
-    console.log('Options:');
-    for (const [key, def] of entries) {
-      const isPos = op.cliHints?.positional?.includes(key);
-      const req = def.required ? ' (required)' : '';
-      const prefix = isPos ? `  <${key}>` : `  --${key.replace(/_/g, '-')}`;
-      console.log(`${prefix.padEnd(28)} ${def.description || ''}${req}`);
-    }
-  }
-}
-
-function printHelp() {
-  // Gather shared operations grouped by category
-  const cliNames = Array.from(cliOps.entries())
-    .map(([name, op]) => ({ name, desc: op.description }));
-
-  console.log(`gbrain ${VERSION} -- personal knowledge brain
-
-USAGE
-  gbrain <command> [options]
-
-SETUP
-  init [--pglite|--supabase|--url]   Create brain (PGLite default, no server)
-  migrate --to <supabase|pglite>     Transfer brain between engines
-  upgrade                            Self-update
-  check-update [--json]              Check for new versions
-  doctor [--json] [--fast]            Health check (resolver, skills, pgvector, RLS, embeddings)
-  integrations [subcommand]          Manage integration recipes (senses + reflexes)
-
-PAGES
-  get <slug>                         Read a page
-  put <slug> [< file.md]             Write/update a page
-  delete <slug>                      Delete a page
-  list [--type T] [--tag T] [-n N]   List pages
-
-SEARCH
-  search <query>                     Keyword search (tsvector)
-  query <question> [--no-expand]     Hybrid search (RRF + expansion)
-  ask <question> [--no-expand]       Alias for query
-
-IMPORT/EXPORT
-  import <dir> [--no-embed]          Import markdown directory
-  sync [--repo <path>] [flags]       Git-to-brain incremental sync
-  sync --watch [--interval N]        Continuous sync (loops until stopped)
-  sync --install-cron                Install persistent sync daemon
-  export [--dir ./out/]              Export to markdown
-  export --restore-only [--repo <p>] Restore missing supabase-only files
-        [--type T] [--slug-prefix S] With optional filters
-
-FILES
-  files list [slug]                  List stored files
-  files upload <file> --page <slug>  Upload file to storage
-  files upload-raw <file> --page <s> Smart upload (size routing + .redirect.yaml)
-  files signed-url <path>            Generate signed URL (1-hour)
-  files sync <dir>                   Bulk upload directory
-  files verify                       Verify all uploads
-
-EMBEDDINGS
-  embed [<slug>|--all|--stale]       Generate/refresh embeddings
-
-LINKS
-  link <from> <to> [--type T]        Create typed link
-  unlink <from> <to>                 Remove link
-  backlinks <slug>                   Incoming links
-  graph <slug> [--depth N]           Traverse link graph (returns nodes)
-  graph-query <slug> [--type T]      Edge-based traversal with type/direction filters
-        [--depth N] [--direction in|out|both]
-
-TAGS
-  tags <slug>                        List tags
-  tag <slug> <tag>                   Add tag
-  untag <slug> <tag>                 Remove tag
-
-TIMELINE
-  timeline [<slug>]                  View timeline
-  timeline-add <slug> <date> <text>  Add timeline entry
-
-TOOLS
-  extract <links|timeline|all>       Extract links/timeline (idempotent)
-        [--source fs|db]             fs (default) walks .md files; db iterates engine pages
-        [--dir <brain>]              brain dir for fs source
-        [--type T] [--since DATE]    filters (db source)
-        [--dry-run] [--json]
-  publish <page.md> [--password]     Shareable HTML (strips private data, optional AES-256)
-  check-backlinks <check|fix> [dir]  Find/fix missing back-links across brain
-  lint <dir|file> [--fix]            Catch LLM artifacts, placeholder dates, bad frontmatter
-  orphans [--json] [--count]         Find pages with no inbound wikilinks
-  salience [--days N] [--kind P]     v0.29: pages ranked by emotional + activity salience
-  anomalies [--since D] [--sigma N]  v0.29: cohort-based statistical anomalies (tag, type)
-  transcripts recent [--days N]      v0.29: recent raw .txt transcripts (local-only)
-  dream [--dry-run] [--json]         Run the overnight maintenance cycle once (cron-friendly).
-                                     See also: autopilot --install (continuous daemon).
-  check-resolvable [--json] [--fix]  Validate skill tree (reachability/MECE/DRY)
-  report --type <name> --content ... Save timestamped report to brain/reports/
-
-SOURCES (multi-repo / multi-brain)
-  sources list                       Show registered sources
-  sources add <id> --path <p>        Register a source (id = short name, e.g. 'wiki')
-  sources remove <id>                Remove a source + its pages
-  sync --all                         Sync all sources with a local_path
-  sync --source <id>                 Sync one specific source
-  repos ...                          DEPRECATED alias for 'sources' (v0.19.0)
-
-CODE INDEXING (v0.19.0 / v0.20.0 Cathedral II)
-  code-def <symbol> [--lang l]       Find the definition of a symbol across code pages
-  code-refs <symbol> [--lang l]      Find all references to a symbol (JSON-first)
-  code-callers <symbol>              Who calls this symbol? (v0.20.0 A1)
-  code-callees <symbol>              What does this symbol call? (v0.20.0 A1)
-  query <q> --lang <l>               Filter hybrid search to one language (v0.20.0)
-  query <q> --symbol-kind <k>        Filter to symbol type (function|class|method|...) (v0.20.0)
-  reconcile-links [--dry-run]        Batch-recompute doc↔impl edges (v0.20.0)
-  reindex-code [--source id] [--yes] Explicit code-page reindex (v0.20.0)
-  sync --strategy code               Sync code files into the brain
-
-JOBS (Minions)
-  jobs submit <name> [--params JSON]  Submit background job [--follow] [--dry-run]
-  jobs list [--status S] [--limit N]  List jobs
-  jobs get <id>                       Job details + history
-  jobs cancel <id>                    Cancel job
-  jobs retry <id>                     Re-queue failed/dead job
-  jobs prune [--older-than 30d]       Clean old jobs
-  jobs stats                          Job health dashboard
-  jobs work [--queue Q]               Start worker daemon (Postgres only)
-
-ADMIN
-  stats                              Brain statistics
-  health                             Brain health dashboard
-  history <slug>                     Page version history
-  revert <slug> <version-id>         Revert to version
-  features [--json] [--auto-fix]     Scan usage + recommend unused features
-  autopilot [--repo] [--interval N]  Self-maintaining brain daemon
-  config [show|get|set] <key> [val]  Brain config
-  storage status [--repo <path>]     Storage tier status and health
-        [--json]                     (git-tracked vs supabase-only)
-  serve                              MCP server (stdio)
-  serve --http [--port N]            HTTP MCP server with OAuth 2.1
-    --token-ttl N                    Access token TTL in seconds (default: 3600)
-    --enable-dcr                     Enable Dynamic Client Registration
-    --public-url URL                 Public issuer URL (required behind proxy/tunnel)
-  call <tool> '<json>'               Raw tool invocation
-  version                            Version info
-  --tools-json                       Tool discovery (JSON)
-
-Run gbrain <command> --help for command-specific help.
-`);
-}
 
 main().catch(e => {
   console.error(e.message || e);
