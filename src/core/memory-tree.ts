@@ -80,7 +80,7 @@ function pageNode(result: SearchResult): MemoryTreeNode {
     type: 'page',
     label: result.title || result.slug,
     parent_id: parent,
-    summary: result.snippet || '',
+    summary: result.chunk_text || '',
   };
 }
 
@@ -105,10 +105,16 @@ async function fallbackPages(engine: BrainEngine, query: string, limit: number):
   ) as Array<{ slug: string; title: string; compiled_truth: string }>;
   return rows.map(row => ({
     slug: row.slug,
+    page_id: 0,
     title: row.title,
-    snippet: row.compiled_truth,
+    type: 'wiki',
+    chunk_text: row.compiled_truth,
+    chunk_source: 'compiled_truth' as const,
+    chunk_id: 0,
+    chunk_index: 0,
     score: 1,
-  })) as SearchResult[];
+    stale: false,
+  })) as unknown as SearchResult[];
 }
 
 export async function buildMemoryTree(engine: BrainEngine, query: string, limit = 10) {

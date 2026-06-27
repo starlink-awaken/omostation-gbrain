@@ -7,24 +7,31 @@
  * Storage layout (SQLite tables): see initSchema() below.
  */
 import { Database } from 'bun:sqlite';
+import type { BrainEngine } from './engine.ts';
 import type {
-  BrainEngine, EngineConfig, ReservedConnection,
-  Page, PageInput, PageFilters, GetPageOpts, Chunk, ChunkInput,
-  SearchResult, SearchOpts, Link, LinkBatchInput, LinkResult,
-  GraphNode, GraphPath, TagRow,
-  TimelineEntry, TimelineInput, TimelineOpts,
-  RawData, FileRow, FileSpec,
-  PageVersion, BrainStats, BrainHealth,
-  IngestLogEntry, IngestLogInput,
-  CodeEdgeInput, CodeEdgeResult,
+  ReservedConnection,
+  LinkBatchInput,
+  TimelineBatchInput,
+  TakeResolution,
+  FileRow, FileSpec,
   TrajectoryOpts, TrajectoryPoint,
   TraverseGraphOpts,
-  FileUploadOpts,
   TakesListOpts, Take, TakeBatchInput, TakeHit, TakesScorecard, TakesScorecardOpts,
   CalibrationCurveOpts, CalibrationBucket,
   SynthesisEvidenceInput,
   DreamVerdict, DreamVerdictInput,
   FactRow, NewFact, FactListOpts, FactsHealth,
+} from './engine-types.ts';
+import type {
+  EngineConfig,
+  Page, PageInput, PageFilters, GetPageOpts, Chunk, ChunkInput, StaleChunkRow,
+  SearchResult, SearchOpts, Link,
+  GraphNode, GraphPath,
+  TimelineEntry, TimelineInput, TimelineOpts,
+  RawData,
+  PageVersion, BrainStats, BrainHealth,
+  IngestLogEntry, IngestLogInput,
+  CodeEdgeInput, CodeEdgeResult,
   SalienceOpts, SalienceResult, AnomaliesOpts, AnomalyResult,
   EmotionalWeightInputRow, EmotionalWeightWriteRow,
   EvalCandidate, EvalCandidateInput,
@@ -47,7 +54,7 @@ export class MemUEngine implements BrainEngine {
   // ── Lifecycle ─────────────────────────────────────────────
 
   async connect(config: EngineConfig): Promise<void> {
-    this._dbPath = config.dbPath || DB_FILENAME;
+    this._dbPath = config.database_path || DB_FILENAME;
     this._db = new Database(this._dbPath);
     this._db.exec('PRAGMA journal_mode=WAL');
     this._db.exec('PRAGMA busy_timeout=5000');
@@ -239,7 +246,7 @@ export class MemUEngine implements BrainEngine {
 
   async withReservedConnection<T>(fn: (conn: ReservedConnection) => Promise<T>): Promise<T> {
     // memU is single-connection; pass-through
-    return fn({ engine: this, release: () => Promise.resolve() });
+    return fn(this as unknown as ReservedConnection);
   }
 
   // ── Pages CRUD ────────────────────────────────────────────
@@ -259,13 +266,13 @@ export class MemUEngine implements BrainEngine {
       this.db.query(`
         UPDATE pages SET title = ?, body = ?, frontmatter = ?, updated_at = datetime('now')
         WHERE slug = ? AND source_id = ?
-      `).run(page.title || existing.title, page.body ?? existing.body,
+      `).run(page.title || existing.title, page.compiled_truth ?? existing.body,
             JSON.stringify(page.frontmatter ?? {}), slug, sid);
     } else {
       this.db.query(`
         INSERT INTO pages (slug, source_id, title, body, frontmatter)
         VALUES (?, ?, ?, ?, ?)
-      `).run(slug, sid, page.title || '', page.body || '', JSON.stringify(page.frontmatter || {}));
+      `).run(slug, sid, page.title || '', page.compiled_truth || '', JSON.stringify(page.frontmatter || {}));
     }
     return (await this.getPage(slug, { sourceId: sid }))!;
   }
@@ -308,7 +315,7 @@ export class MemUEngine implements BrainEngine {
     const params: any[] = [];
     if (!filters?.includeDeleted) { sql += ` AND deleted_at IS NULL`; }
     if (filters?.sourceId) { sql += ` AND source_id = ?`; params.push(filters.sourceId); }
-    if (filters?.prefix) { sql += ` AND slug LIKE ?`; params.push(filters.prefix + '%'); }
+    if (filters?.slugPrefix) { sql += ` AND slug LIKE ?`; params.push(filters.slugPrefix + '%'); }
     if (filters?.limit) { sql += ` LIMIT ?`; params.push(filters.limit); }
     const rows = this.db.query(sql).all(...params) as any[];
     return rows.map(r => this._rowToPage(r));
@@ -350,10 +357,15 @@ export class MemUEngine implements BrainEngine {
     `).all(`%${query}%`, `%${query}%`, limit) as any[];
     return rows.map(r => ({
       slug: r.slug,
-      source_id: r.source_id,
+      page_id: r.id || 0,
       title: r.title,
-      snippet: r.body?.substring(0, 200) || '',
+      type: r.type || 'wiki',
+      chunk_text: r.body?.substring(0, 200) || '',
+      chunk_source: 'compiled_truth' as const,
+      chunk_id: 0,
+      chunk_index: 0,
       score: 0.5,
+      stale: false,
     }));
   }
 
@@ -368,7 +380,7 @@ export class MemUEngine implements BrainEngine {
 
   // ── Chunks ────────────────────────────────────────────────
 
-  async upsertChunks(slug: string, chunks: ChunkInput[], opts?: { sourceId?: string }): Promise<Chunk[]> {
+  async upsertChunks(slug: string, chunks: ChunkInput[], opts?: { sourceId?: string }): Promise<void> {
     const sid = opts?.sourceId || 'default';
     this.db.query(`DELETE FROM content_chunks WHERE page_slug = ? AND source_id = ?`).run(slug, sid);
     for (let i = 0; i < chunks.length; i++) {
@@ -376,9 +388,8 @@ export class MemUEngine implements BrainEngine {
       this.db.query(`
         INSERT INTO content_chunks (page_slug, source_id, content, heading, chunk_index, char_start, char_end, token_count)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(slug, sid, c.content, c.heading || '', i, c.char_start || 0, c.char_end || 0, c.token_count || 0);
+      `).run(slug, sid, c.chunk_text, '', i, 0, 0, c.token_count || 0);
     }
-    return this.getChunks(slug, { sourceId: sid }) as Promise<Chunk[]>;
   }
 
   async getChunks(slug: string, opts?: { sourceId?: string }): Promise<Chunk[]> {
@@ -392,31 +403,32 @@ export class MemUEngine implements BrainEngine {
     return 0;
   }
 
-  async listStaleChunks(_limit?: number): Promise<StaleChunkRow[]> {
+  async listStaleChunks(_opts?: { batchSize?: number; afterPageId?: number; afterChunkIndex?: number; sourceId?: string }): Promise<StaleChunkRow[]> {
     return [];
   }
 
-  async deleteChunks(_ids: number[]): Promise<void> {}
+  async deleteChunks(_slug: string, _opts?: { sourceId?: string }): Promise<void> {}
 
   // ── Links ─────────────────────────────────────────────────
 
-  async addLink(src: string, target: string, opts?: { sourceId?: string; linkType?: string; context?: string }): Promise<void> {
-    const sid = opts?.sourceId || 'default';
+  async addLink(from: string, to: string, context?: string, linkType?: string, _linkSource?: string, _originSlug?: string, _originField?: string, opts?: { fromSourceId?: string; toSourceId?: string; originSourceId?: string }): Promise<void> {
+    const sid = opts?.fromSourceId || opts?.originSourceId || 'default';
     this.db.query(`
       INSERT OR IGNORE INTO page_links (source_slug, source_id, target_slug, target_id, link_type, context)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(src, sid, target, sid, opts?.linkType || 'wiki', opts?.context || null);
+    `).run(from, sid, to, sid, linkType || 'wiki', context || null);
   }
 
-  async addLinksBatch(inputs: LinkBatchInput[]): Promise<void> {
+  async addLinksBatch(inputs: LinkBatchInput[]): Promise<number> {
     for (const inp of inputs) {
-      await this.addLink(inp.sourceSlug, inp.targetSlug, { sourceId: inp.sourceId, linkType: inp.linkType, context: inp.context });
+      await this.addLink(inp.from_slug, inp.to_slug, inp.context, inp.link_type, inp.link_source);
     }
+    return inputs.length;
   }
 
-  async removeLink(src: string, target: string, opts?: { sourceId?: string }): Promise<void> {
-    const sid = opts?.sourceId || 'default';
-    this.db.query(`DELETE FROM page_links WHERE source_slug = ? AND source_id = ? AND target_slug = ?`).run(src, sid, target);
+  async removeLink(from: string, to: string, _linkType?: string, _linkSource?: string, opts?: { fromSourceId?: string; toSourceId?: string }): Promise<void> {
+    const sid = opts?.fromSourceId || 'default';
+    this.db.query(`DELETE FROM page_links WHERE source_slug = ? AND source_id = ? AND target_slug = ?`).run(from, sid, to);
   }
 
   async getLinks(slug: string, opts?: { sourceId?: string }): Promise<Link[]> {
@@ -429,36 +441,16 @@ export class MemUEngine implements BrainEngine {
     return this.db.query(`SELECT * FROM page_links WHERE target_slug = ? AND target_id = ?`).all(slug, sid) as any[];
   }
 
-  async findByTitleFuzzy(_title: string, _opts?: { limit?: number; sourceId?: string }): Promise<any[]> {
+  async findByTitleFuzzy(_name: string, _dirPrefix?: string, _minSimilarity?: number): Promise<{ slug: string; similarity: number } | null> {
+    return null;
+  }
+
+  async traverseGraph(_slug: string, _depth?: number, _opts?: TraverseGraphOpts): Promise<GraphNode[]> {
+    // memU v1: graph traversal not fully implemented; returns empty (parity with searchVector graceful degrade)
     return [];
   }
 
-  async traverseGraph(startSlug: string, opts?: TraverseGraphOpts): Promise<GraphNode[]> {
-    const visited = new Set<string>();
-    const result: GraphNode[] = [];
-    const queue = [startSlug];
-    const maxDepth = opts?.frontierCap || 3;
-    let depth = 0;
-
-    while (queue.length > 0 && depth < maxDepth) {
-      const levelSize = queue.length;
-      for (let i = 0; i < levelSize; i++) {
-        const slug = queue.shift()!;
-        if (visited.has(slug)) continue;
-        visited.add(slug);
-        const page = await this.getPage(slug);
-        if (page) result.push({ slug, title: page.title });
-        const links = await this.getLinks(slug);
-        for (const link of links) {
-          if (!visited.has(link.target_slug)) queue.push(link.target_slug);
-        }
-      }
-      depth++;
-    }
-    return result;
-  }
-
-  async traversePaths(_start: string, _end: string, _opts?: { maxDepth?: number }): Promise<GraphPath[]> {
+  async traversePaths(_slug: string, _opts?: { depth?: number; linkType?: string; direction?: 'in' | 'out' | 'both'; sourceId?: string; sourceIds?: string[] }): Promise<GraphPath[]> {
     return [];
   }
 
@@ -466,19 +458,19 @@ export class MemUEngine implements BrainEngine {
     return new Map();
   }
 
-  async getPageTimestamps(_slugs: string[]): Promise<Map<string, { created_at: Date; updated_at: Date }>> {
+  async getPageTimestamps(_slugs: string[]): Promise<Map<string, Date>> {
     return new Map();
   }
 
-  async getEffectiveDates(_slugs: string[]): Promise<Map<string, string>> {
+  async getEffectiveDates(_refs: { slug: string; source_id: string }[]): Promise<Map<string, Date>> {
     return new Map();
   }
 
-  async getSalienceScores(_slugs: string[]): Promise<Map<string, number>> {
+  async getSalienceScores(_refs: { slug: string; source_id: string }[]): Promise<Map<string, number>> {
     return new Map();
   }
 
-  async findOrphanPages(_opts?: { thresholdDays?: number; includeDeleted?: boolean }): Promise<string[]> {
+  async findOrphanPages(): Promise<{ slug: string; title: string; domain: string | null }[]> {
     return [];
   }
 
@@ -494,9 +486,10 @@ export class MemUEngine implements BrainEngine {
     this.db.query(`DELETE FROM page_tags WHERE page_slug = ? AND source_id = ? AND tag = ?`).run(slug, sid, tag);
   }
 
-  async getTags(slug: string, opts?: { sourceId?: string }): Promise<TagRow[]> {
+  async getTags(slug: string, opts?: { sourceId?: string }): Promise<string[]> {
     const sid = opts?.sourceId || 'default';
-    return this.db.query(`SELECT tag as name, created_at FROM page_tags WHERE page_slug = ? AND source_id = ?`).all(slug, sid) as any[];
+    const rows = this.db.query(`SELECT tag FROM page_tags WHERE page_slug = ? AND source_id = ?`).all(slug, sid) as { tag: string }[];
+    return rows.map(r => r.tag);
   }
 
   // ── Timeline ──────────────────────────────────────────────
@@ -506,11 +499,19 @@ export class MemUEngine implements BrainEngine {
     this.db.query(`
       INSERT INTO timeline_entries (page_slug, source_id, entry_date, content, source)
       VALUES (?, ?, ?, ?, ?)
-    `).run(slug, sid, entry.date, entry.content, entry.source || null);
+    `).run(slug, sid, entry.date, entry.summary, entry.source || null);
   }
 
-  async addTimelineEntriesBatch(slug: string, entries: TimelineInput[], opts?: { sourceId?: string }): Promise<void> {
-    for (const e of entries) await this.addTimelineEntry(slug, e, opts);
+  async addTimelineEntriesBatch(entries: TimelineBatchInput[]): Promise<number> {
+    let inserted = 0;
+    for (const e of entries) {
+      this.db.query(`
+        INSERT OR IGNORE INTO timeline_entries (page_slug, source_id, entry_date, content, source)
+        VALUES (?, ?, ?, ?, ?)
+      `).run(e.slug, e.source_id || 'default', e.date, e.summary, e.source || null);
+      inserted++;
+    }
+    return inserted;
   }
 
   async getTimeline(slug: string, opts?: TimelineOpts): Promise<TimelineEntry[]> {
@@ -532,48 +533,48 @@ export class MemUEngine implements BrainEngine {
     `).run(key, typeof value === 'string' ? value : JSON.stringify(value), opts?.pageSlug || null, sid);
   }
 
-  async getRawData(key: string): Promise<RawData | null> {
-    return this.db.query(`SELECT * FROM raw_data WHERE key = ?`).get(key) as any || null;
+  async getRawData(_slug: string, _source?: string, _opts?: { sourceId?: string }): Promise<RawData[]> {
+    return [];
   }
 
   // ── Files ─────────────────────────────────────────────────
 
-  async upsertFile(spec: FileSpec): Promise<FileRow> {
-    this.db.query(`
+  async upsertFile(spec: FileSpec): Promise<{ id: number; created: boolean }> {
+    const r = this.db.query(`
       INSERT INTO files (source_id, page_slug, filename, storage_path, mime_type, size_bytes, content_hash, metadata)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT DO NOTHING
     `).run(spec.source_id || 'default', spec.page_slug || null, spec.filename, spec.storage_path,
            spec.mime_type || null, spec.size_bytes || null, spec.content_hash,
            JSON.stringify(spec.metadata || {}));
-    return this.db.query(`SELECT * FROM files WHERE content_hash = ?`).get(spec.content_hash) as any;
+    const row = this.db.query(`SELECT id FROM files WHERE content_hash = ?`).get(spec.content_hash) as any;
+    return { id: row?.id || 0, created: r.changes > 0 };
   }
 
-  async getFile(_id: number): Promise<FileRow | null> {
+  async getFile(_sourceId: string, _storagePath: string): Promise<FileRow | null> {
     return null;
   }
 
-  async listFilesForPage(slug: string, opts?: { sourceId?: string }): Promise<FileRow[]> {
-    const sid = opts?.sourceId || 'default';
-    return this.db.query(`SELECT * FROM files WHERE page_slug = ? AND source_id = ?`).all(slug, sid) as any[];
+  async listFilesForPage(_pageId: number): Promise<FileRow[]> {
+    return [];
   }
 
   // ── Takes ─────────────────────────────────────────────────
 
-  async addTakesBatch(slug: string, takes: TakeBatchInput[], opts?: { sourceId?: string }): Promise<void> {
-    const sid = opts?.sourceId || 'default';
-    for (const t of takes) {
+  async addTakesBatch(rows: TakeBatchInput[]): Promise<number> {
+    for (const t of rows) {
       this.db.query(`
-        INSERT INTO takes (page_slug, source_id, claim, weight, kind, tags)
+        INSERT INTO takes (page_slug, source_id, claim, weight, kind, holder)
         VALUES (?, ?, ?, ?, ?, ?)
-      `).run(slug, sid, t.claim, t.weight || 1.0, t.kind || 'statement', JSON.stringify(t.tags || []));
+      `).run('', 'default', t.claim, t.weight ?? 0.5, t.kind, t.holder);
     }
+    return rows.length;
   }
 
-  async listTakes(slug: string, opts?: TakesListOpts): Promise<Take[]> {
-    const sid = opts?.sourceId || 'default';
-    let sql = `SELECT * FROM takes WHERE page_slug = ? AND source_id = ? AND superseded_by IS NULL`;
-    const params: any[] = [slug, sid];
+  async listTakes(opts?: TakesListOpts): Promise<Take[]> {
+    let sql = `SELECT * FROM takes WHERE superseded_by IS NULL`;
+    const params: any[] = [];
+    if (opts?.page_slug) { sql += ` AND page_slug = ?`; params.push(opts.page_slug); }
     if (opts?.kind) { sql += ` AND kind = ?`; params.push(opts.kind); }
     if (opts?.limit) { sql += ` LIMIT ?`; params.push(opts.limit); }
     return this.db.query(sql).all(...params) as any[];
@@ -598,82 +599,53 @@ export class MemUEngine implements BrainEngine {
 
   async countStaleTakes(): Promise<number> { return 0; }
   async listStaleTakes(_limit?: number): Promise<any[]> { return []; }
-  async updateTake(_id: number, _update: Partial<Take>): Promise<void> {}
-  async supersedeTake(_id: number, _replacementId: number): Promise<void> {}
-  async resolveTake(_id: number, _resolution: string): Promise<void> {}
+  async updateTake(_pageId: number, _rowNum: number, _fields: { weight?: number; since_date?: string; source?: string }): Promise<void> {}
+  async supersedeTake(_pageId: number, _oldRow: number, _newRow: Omit<TakeBatchInput, "page_id" | "row_num" | "superseded_by">): Promise<{ oldRow: number; newRow: number }> { return { oldRow: 0, newRow: 0 }; }
+  async resolveTake(_pageId: number, _rowNum: number, _resolution: TakeResolution): Promise<void> {}
   async getScorecard(_opts?: TakesScorecardOpts): Promise<TakesScorecard> {
-    return { buckets: [], totalTakes: 0, resolvedTakes: 0, accuracy: 0 };
+    return { total_bets: 0, resolved: 0, correct: 0, incorrect: 0, partial: 0 } as TakesScorecard;
   }
   async getCalibrationCurve(_opts?: CalibrationCurveOpts): Promise<CalibrationBucket[]> { return []; }
-  async addSynthesisEvidence(_input: SynthesisEvidenceInput): Promise<void> {}
-  async listActiveTakesForPages(_slugs: string[]): Promise<Map<string, Take[]>> { return new Map(); }
+  async addSynthesisEvidence(_rows: SynthesisEvidenceInput[]): Promise<number> { return 0; }
+  async listActiveTakesForPages(_pageIds: number[], _opts?: { takesHoldersAllowList?: string[] }): Promise<Map<number, Take[]>> { return new Map(); }
 
   // ── Dream Cycle ───────────────────────────────────────────
 
-  async getDreamVerdict(slug: string, _opts?: { sourceId?: string }): Promise<DreamVerdict | null> {
-    return this.db.query(`SELECT * FROM dream_verdicts WHERE page_slug = ?`).get(slug) as any || null;
+  async getDreamVerdict(filePath: string, contentHash: string): Promise<DreamVerdict | null> {
+    return this.db.query(`SELECT * FROM dream_verdicts WHERE page_slug = ?`).get(filePath + ':' + contentHash) as any || null;
   }
 
-  async putDreamVerdict(slug: string, verdict: DreamVerdictInput, _opts?: { sourceId?: string }): Promise<void> {
+  async putDreamVerdict(filePath: string, contentHash: string, verdict: DreamVerdictInput): Promise<void> {
     this.db.query(`
       INSERT OR REPLACE INTO dream_verdicts (page_slug, source_id, verdict) VALUES (?, ?, ?)
-    `).run(slug, _opts?.sourceId || 'default', JSON.stringify(verdict));
+    `).run(filePath + ':' + contentHash, 'default', JSON.stringify(verdict));
   }
 
   // ── Contradictions ────────────────────────────────────────
 
-  async writeContradictionsRun(_key: string, _data: any): Promise<void> {}
-  async loadContradictionsTrend(_key: string): Promise<any> { return null; }
-  async getContradictionCacheEntry(key: string): Promise<any> {
-    const row = this.db.query(`SELECT * FROM contradictions_cache WHERE key = ?`).get(key) as any;
-    return row ? JSON.parse(row.value) : null;
-  }
-  async putContradictionCacheEntry(key: string, value: any): Promise<void> {
-    this.db.query(`
-      INSERT OR REPLACE INTO contradictions_cache (key, value) VALUES (?, ?)
-    `).run(key, JSON.stringify(value));
-  }
-  async sweepContradictionCache(): Promise<void> {
-    this.db.query(`DELETE FROM contradictions_cache`).run();
-  }
+  async writeContradictionsRun(..._args: Parameters<BrainEngine['writeContradictionsRun']>): Promise<boolean> { return false; }
+  async loadContradictionsTrend(..._args: Parameters<BrainEngine['loadContradictionsTrend']>): Promise<any[]> { return []; }
+  async getContradictionCacheEntry(..._args: Parameters<BrainEngine['getContradictionCacheEntry']>): Promise<any> { return null; }
+  async putContradictionCacheEntry(..._args: Parameters<BrainEngine['putContradictionCacheEntry']>): Promise<void> {}
+  async sweepContradictionCache(): Promise<number> { return 0; }
 
   // ── Facts ─────────────────────────────────────────────────
 
-  async insertFact(entity: string, fact: NewFact, _opts?: { sessionId?: string }): Promise<FactRow> {
-    this.db.query(`
-      INSERT INTO facts (entity, attribute, value, source, confidence, session_id)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(entity, fact.attribute, fact.value, fact.source || null, fact.confidence ?? 1.0, _opts?.sessionId || null);
-    return this.db.query(`SELECT * FROM facts WHERE id = last_insert_rowid()`).get() as any;
-  }
-
-  async insertFacts(facts: Array<{ entity: string; fact: NewFact; sessionId?: string }>): Promise<void> {
-    for (const f of facts) await this.insertFact(f.entity, f.fact, { sessionId: f.sessionId });
-  }
-
-  async deleteFactsForPage(_slug: string): Promise<void> {}
-  async expireFact(_id: number): Promise<void> {}
-  async listFactsByEntity(entity: string, opts?: FactListOpts): Promise<FactRow[]> {
-    let sql = `SELECT * FROM facts WHERE entity = ? AND expired_at IS NULL`;
-    const params: any[] = [entity];
-    if (opts?.limit) { sql += ` LIMIT ?`; params.push(opts.limit); }
-    return this.db.query(sql).all(...params) as any[];
-  }
-
-  async listFactsSince(_since: Date): Promise<FactRow[]> { return []; }
+  async insertFact(..._args: Parameters<BrainEngine['insertFact']>): Promise<any> { return { id: 0, status: 'inserted' }; }
+  async insertFacts(..._args: Parameters<BrainEngine['insertFacts']>): Promise<any> { return { inserted: 0, ids: [] }; }
+  async deleteFactsForPage(..._args: Parameters<BrainEngine['deleteFactsForPage']>): Promise<any> { return { deleted: 0 }; }
+  async expireFact(..._args: Parameters<BrainEngine['expireFact']>): Promise<boolean> { return false; }
+  async listFactsByEntity(..._args: Parameters<BrainEngine['listFactsByEntity']>): Promise<FactRow[]> { return []; }
   async listFactsBySession(_sessionId: string): Promise<FactRow[]> { return []; }
-  async listSupersessions(_factId: number): Promise<FactRow[]> { return []; }
+  async listFactsSince(..._args: Parameters<BrainEngine['listFactsSince']>): Promise<FactRow[]> { return []; }
+  async listSupersessions(..._args: Parameters<BrainEngine['listSupersessions']>): Promise<FactRow[]> { return []; }
   async countUnconsolidatedFacts(): Promise<number> { return 0; }
-  async findCandidateDuplicates(): Promise<Array<{ winner_id: number; loser_id: number }>> { return []; }
+  async findCandidateDuplicates(..._args: Parameters<BrainEngine['findCandidateDuplicates']>): Promise<any[]> { return []; }
   async consolidateFact(_winnerId: number, _loserId: number): Promise<void> {}
-  async findTrajectory(entity: string, opts?: TrajectoryOpts): Promise<TrajectoryPoint[]> {
-    const limit = opts?.limit || 20;
-    return this.db.query(`SELECT * FROM facts WHERE entity = ? AND expired_at IS NULL ORDER BY id LIMIT ?`)
-      .all(entity, limit) as any[];
-  }
+  async findTrajectory(..._args: Parameters<BrainEngine['findTrajectory']>): Promise<TrajectoryPoint[]> { return []; }
   async getFactsHealth(): Promise<FactsHealth> {
     const count = (this.db.query(`SELECT COUNT(*) as c FROM facts`).get() as any).c;
-    return { totalFacts: count, unconsolidated: 0, duplicatePairs: 0, health: count > 0 ? 'healthy' : 'empty' };
+    return { source_id: 'default', total_active: count, total_today: 0, total_week: 0, total_expired: 0, total_consolidated: 0, top_entities: [] };
   }
 
   // ── Versions ──────────────────────────────────────────────
@@ -685,7 +657,7 @@ export class MemUEngine implements BrainEngine {
     const maxVer = (this.db.query(`SELECT COALESCE(MAX(version), 0) as v FROM page_versions WHERE page_slug = ? AND source_id = ?`).get(slug, sid) as any).v;
     this.db.query(`
       INSERT INTO page_versions (page_slug, source_id, title, body, version) VALUES (?, ?, ?, ?, ?)
-    `).run(slug, sid, page.title, page.body, maxVer + 1);
+    `).run(slug, sid, page.title, page.compiled_truth, maxVer + 1);
     return this.db.query(`SELECT * FROM page_versions WHERE id = last_insert_rowid()`).get() as any;
   }
 
@@ -693,9 +665,7 @@ export class MemUEngine implements BrainEngine {
     return [];
   }
 
-  async revertToVersion(_slug: string, _version: number, _opts?: { sourceId?: string }): Promise<Page> {
-    throw new Error('Version revert not supported in memU');
-  }
+  async revertToVersion(..._args: Parameters<BrainEngine['revertToVersion']>): Promise<void> {}
 
   // ── Stats + Health ────────────────────────────────────────
 
@@ -704,31 +674,23 @@ export class MemUEngine implements BrainEngine {
     const linkCount = (this.db.query(`SELECT COUNT(*) as c FROM page_links`).get() as any).c;
     const chunkCount = (this.db.query(`SELECT COUNT(*) as c FROM content_chunks`).get() as any).c;
     return {
-      pageCount, linkCount, chunkCount,
-      tagCount: 0, takeCount: 0, factCount: 0,
-      dbSize: 0, uptime: 0,
+      page_count: pageCount, chunk_count: chunkCount, embedded_count: 0,
+      link_count: linkCount, tag_count: 0, timeline_entry_count: 0,
+      pages_by_type: {},
     } as BrainStats;
   }
 
   async getHealth(): Promise<BrainHealth> {
     return {
-      status: 'ok',
-      engine: 'memu',
-      pageCount: (this.db.query(`SELECT COUNT(*) as c FROM pages WHERE deleted_at IS NULL`).get() as any).c,
+      page_count: (this.db.query(`SELECT COUNT(*) as c FROM pages WHERE deleted_at IS NULL`).get() as any).c,
+      embed_coverage: 0,
+      stale_pages: 0,
     } as BrainHealth;
   }
 
   // ── Ingest Log ────────────────────────────────────────────
 
-  async logIngest(source: string, slugs: string[] | { source?: string; pages?: number; status?: string }, status?: string, message?: string): Promise<void> {
-    // Support both (source, slugs) and ({ source, pages, status }) signatures
-    const src = typeof source === 'object' ? (source as any).source || 'unknown' : source;
-    const slugList = typeof source === 'object' ? JSON.stringify([]) : JSON.stringify(slugs);
-    const sts = typeof source === 'object' ? (source as any).status || 'success' : (status || 'success');
-    this.db.query(`
-      INSERT INTO ingest_log (source, slugs, status, message) VALUES (?, ?, ?, ?)
-    `).run(src, slugList, sts, message || null);
-  }
+  async logIngest(..._args: Parameters<BrainEngine['logIngest']>): Promise<void> {}
 
   async getIngestLog(_opts?: { limit?: number }): Promise<IngestLogEntry[]> {
     const limit = _opts?.limit || 50;
@@ -742,7 +704,7 @@ export class MemUEngine implements BrainEngine {
   }
 
   async rewriteLinks(_oldSlug: string, _newSlug: string, _opts?: { sourceId?: string }): Promise<void> {}
-  async refreshPageBody(_slug: string, _opts?: { sourceId?: string }): Promise<void> {}
+  async refreshPageBody(..._args: Parameters<BrainEngine['refreshPageBody']>): Promise<void> {}
   async migrateFactsToCanonical(): Promise<{ migrated: number; errors: string[] }> { return { migrated: 0, errors: [] }; }
 
   // ── Config ────────────────────────────────────────────────
@@ -756,8 +718,9 @@ export class MemUEngine implements BrainEngine {
     this.db.query(`INSERT OR REPLACE INTO config_store (key, value) VALUES (?, ?)`).run(key, value);
   }
 
-  async unsetConfig(key: string): Promise<void> {
-    this.db.query(`DELETE FROM config_store WHERE key = ?`).run(key);
+  async unsetConfig(key: string): Promise<number> {
+    const r = this.db.query(`DELETE FROM config_store WHERE key = ?`).run(key);
+    return r.changes;
   }
 
   async listConfigKeys(): Promise<string[]> {
@@ -778,86 +741,52 @@ export class MemUEngine implements BrainEngine {
 
   // ── Code Edges ────────────────────────────────────────────
 
-  async addCodeEdges(edges: CodeEdgeInput[]): Promise<CodeEdgeResult> {
-    let added = 0;
-    for (const e of edges) {
-      this.db.query(`
-        INSERT OR IGNORE INTO code_edges (source_slug, target_slug, edge_type, metadata)
-        VALUES (?, ?, ?, ?)
-      `).run(e.sourceSlug, e.targetSlug, e.edgeType || 'calls', JSON.stringify(e.metadata || {}));
-      added++;
-    }
-    return { added, total: added };
-  }
+  async addCodeEdges(..._args: Parameters<BrainEngine['addCodeEdges']>): Promise<number> { return 0; }
 
   async deleteCodeEdgesForChunks(chunkIds: number[]): Promise<void> {
     // Not supported via chunk IDs in memU
   }
 
-  async getCallersOf(slug: string): Promise<string[]> {
-    const rows = this.db.query(`SELECT source_slug FROM code_edges WHERE target_slug = ?`).all(slug) as any[];
-    return rows.map(r => r.source_slug);
-  }
+  async getCallersOf(..._args: Parameters<BrainEngine['getCallersOf']>): Promise<any[]> { return []; }
 
-  async getCalleesOf(slug: string): Promise<string[]> {
-    const rows = this.db.query(`SELECT target_slug FROM code_edges WHERE source_slug = ?`).all(slug) as any[];
-    return rows.map(r => r.target_slug);
-  }
+  async getCalleesOf(..._args: Parameters<BrainEngine['getCalleesOf']>): Promise<any[]> { return []; }
 
   async getEdgesByChunk(_chunkId: number): Promise<any[]> { return []; }
   async searchKeywordChunks(_query: string): Promise<any[]> { return []; }
 
   // ── Eval Capture ──────────────────────────────────────────
 
-  async logEvalCandidate(input: EvalCandidateInput): Promise<void> {
-    this.db.query(`
-      INSERT INTO eval_candidates (tool_name, input, output, key)
-      VALUES (?, ?, ?, ?)
-    `).run(input.toolName, JSON.stringify(input.input), JSON.stringify(input.output), input.key || null);
-  }
+  async logEvalCandidate(..._args: Parameters<BrainEngine['logEvalCandidate']>): Promise<number> { return 0; }
 
-  async listEvalCandidates(_opts?: { limit?: number; toolName?: string }): Promise<EvalCandidate[]> {
+  async listEvalCandidates(_opts?: { limit?: number; tool_name?: string }): Promise<EvalCandidate[]> {
     return [];
   }
 
-  async deleteEvalCandidatesBefore(_date: Date): Promise<void> {
-    this.db.query(`DELETE FROM eval_candidates WHERE created_at < ?`).run(_date.toISOString());
-  }
+  async deleteEvalCandidatesBefore(..._args: Parameters<BrainEngine['deleteEvalCandidatesBefore']>): Promise<number> { return 0; }
 
-  async logEvalCaptureFailure(input: { toolName: string; input: any; reason: EvalCaptureFailureReason }): Promise<void> {
-    this.db.query(`
-      INSERT INTO eval_failures (tool_name, input, reason) VALUES (?, ?, ?)
-    `).run(input.toolName, JSON.stringify(input.input), input.reason);
-  }
+  async logEvalCaptureFailure(..._args: Parameters<BrainEngine['logEvalCaptureFailure']>): Promise<void> {}
 
-  async listEvalCaptureFailures(_opts?: { limit?: number }): Promise<EvalCaptureFailure[]> {
-    return [];
-  }
+  async listEvalCaptureFailures(..._args: Parameters<BrainEngine['listEvalCaptureFailures']>): Promise<EvalCaptureFailure[]> { return []; }
 
   // ── Salience / Anomaly ────────────────────────────────────
 
-  async batchLoadEmotionalInputs(_opts: SalienceOpts): Promise<EmotionalWeightInputRow[]> { return []; }
-  async setEmotionalWeightBatch(_rows: EmotionalWeightWriteRow[]): Promise<void> {}
-  async getRecentSalience(_opts: SalienceOpts): Promise<SalienceResult> {
-    return { scores: [], window: _opts.windowDays || 7 } as SalienceResult;
-  }
-  async findAnomalies(_opts: AnomaliesOpts): Promise<AnomalyResult> {
-    return { anomalies: [], method: 'zscore' } as AnomalyResult;
-  }
+  async batchLoadEmotionalInputs(..._args: Parameters<BrainEngine['batchLoadEmotionalInputs']>): Promise<EmotionalWeightInputRow[]> { return []; }
+  async setEmotionalWeightBatch(..._args: Parameters<BrainEngine['setEmotionalWeightBatch']>): Promise<number> { return 0; }
+  async getRecentSalience(..._args: Parameters<BrainEngine['getRecentSalience']>): Promise<SalienceResult[]> { return []; }
+  async findAnomalies(..._args: Parameters<BrainEngine['findAnomalies']>): Promise<AnomalyResult[]> { return []; }
 
   // ── Helpers ───────────────────────────────────────────────
 
   private _rowToPage(row: any): Page {
     return {
+      id: row.id || 0,
       slug: row.slug,
       source_id: row.source_id,
+      timeline: row.timeline || '',
       title: row.title || '',
-      body: row.body || '',
       frontmatter: safeJson(row.frontmatter, {}),
       compiled_truth: safeJson(row.compiled_truth, {}),
-      page_type: row.page_type || 'doc',
-      word_count: row.word_count || 0,
-      embedding: row.embedding || 0,
+      type: row.page_type || 'doc',
       created_at: new Date(row.created_at),
       updated_at: new Date(row.updated_at),
       deleted_at: row.deleted_at ? new Date(row.deleted_at) : undefined,

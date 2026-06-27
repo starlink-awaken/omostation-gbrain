@@ -1229,7 +1229,7 @@ export function __resetPGLiteTierWarn(): void {
 
 export function manageGitignore(
   repoPath: string,
-  engineKind?: 'pglite' | 'postgres',
+  engineKind?: 'pglite' | 'postgres' | 'memu',
 ): void {
   if (process.env.GBRAIN_NO_GITIGNORE === '1') {
     return;

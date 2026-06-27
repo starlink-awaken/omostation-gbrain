@@ -23,7 +23,7 @@ interface Migration {
    * Engine-specific SQL. If present, overrides `sql` for the matching engine.
    * Needed when Postgres wants CONCURRENTLY but PGLite can't honor it.
    */
-  sqlFor?: { postgres?: string; pglite?: string };
+  sqlFor?: { postgres?: string; pglite?: string; memu?: string };
   /**
    * When false, the runner does NOT wrap the SQL in `engine.transaction()`.
    * Required for `CREATE INDEX CONCURRENTLY` (which Postgres refuses inside a transaction).

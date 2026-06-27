@@ -152,7 +152,7 @@ export interface EmbeddingMismatchOpts {
    * recipe), which produced the wrong recipe for the default install
    * on PGLite.
    */
-  engineKind: 'pglite' | 'postgres';
+  engineKind: 'pglite' | 'postgres' | 'memu';
   /**
    * Active PGLite database path. Used only for the PGLite branch; if
    * omitted, falls back to the default `gbrainPath('brain.pglite')`.
