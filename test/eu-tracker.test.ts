@@ -12,11 +12,11 @@ const { trackMemoryWriteEUCost } = await import('../src/core/eu-tracker.ts');
 // ── Helpers ────────────────────────────────────────────────────
 
 function mockFetch(response: Partial<Response>): void {
-  globalThis.fetch = mock(() => Promise.resolve(response as Response));
+  globalThis.fetch = mock(() => Promise.resolve(response as Response)) as unknown as typeof fetch;
 }
 
 function mockFetchError(message: string): void {
-  globalThis.fetch = mock(() => Promise.reject(new Error(message)));
+  globalThis.fetch = mock(() => Promise.reject(new Error(message))) as unknown as typeof fetch;
 }
 
 function restoreFetch(): void {
@@ -40,7 +40,7 @@ describe('trackMemoryWriteEUCost', () => {
       calledBody = opts?.body as string;
       calledHeaders = (opts?.headers || {}) as Record<string, string>;
       return new Response('ok', { status: 200 });
-    });
+    }) as unknown as typeof fetch;
 
     await trackMemoryWriteEUCost('gbrain', 'gbrain_memory_write', 1);
 
@@ -71,7 +71,7 @@ describe('trackMemoryWriteEUCost', () => {
   test('does NOT throw on timeout', async () => {
     globalThis.fetch = mock(async () => {
       throw new DOMException('The operation was aborted', 'AbortError');
-    });
+    }) as unknown as typeof fetch;
     await expect(trackMemoryWriteEUCost()).resolves.toBeUndefined();
   });
 
@@ -80,7 +80,7 @@ describe('trackMemoryWriteEUCost', () => {
     globalThis.fetch = mock(async (_url, opts) => {
       calledBody = opts?.body as string;
       return new Response('ok', { status: 200 });
-    });
+    }) as unknown as typeof fetch;
 
     await trackMemoryWriteEUCost();
 
@@ -95,7 +95,7 @@ describe('trackMemoryWriteEUCost', () => {
     globalThis.fetch = mock(async (url) => {
       calledUrl = url.toString();
       return new Response('ok', { status: 200 });
-    });
+    }) as unknown as typeof fetch;
 
     await trackMemoryWriteEUCost('gbrain', 'gbrain_memory_write', 1, 'http://localhost:9999/');
 
