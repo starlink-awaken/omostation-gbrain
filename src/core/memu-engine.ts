@@ -14,13 +14,13 @@ import type {
   TimelineBatchInput,
   TakeResolution,
   FileRow, FileSpec,
-  TrajectoryOpts, TrajectoryPoint,
+  TrajectoryPoint,
   TraverseGraphOpts,
   TakesListOpts, Take, TakeBatchInput, TakeHit, TakesScorecard, TakesScorecardOpts,
   CalibrationCurveOpts, CalibrationBucket,
   SynthesisEvidenceInput,
   DreamVerdict, DreamVerdictInput,
-  FactRow, NewFact, FactListOpts, FactsHealth,
+  FactRow, FactsHealth,
 } from './engine-types.ts';
 import type {
   EngineConfig,
@@ -30,12 +30,11 @@ import type {
   TimelineEntry, TimelineInput, TimelineOpts,
   RawData,
   PageVersion, BrainStats, BrainHealth,
-  IngestLogEntry, IngestLogInput,
-  CodeEdgeInput, CodeEdgeResult,
-  SalienceOpts, SalienceResult, AnomaliesOpts, AnomalyResult,
-  EmotionalWeightInputRow, EmotionalWeightWriteRow,
-  EvalCandidate, EvalCandidateInput,
-  EvalCaptureFailure, EvalCaptureFailureReason,
+  IngestLogEntry,
+  SalienceResult, AnomalyResult,
+  EmotionalWeightInputRow,
+  EvalCandidate,
+  EvalCaptureFailure,
   DomainBankSampleOpts, CorpusSampleOpts, DomainBankRow,
 } from './types.ts';
 
