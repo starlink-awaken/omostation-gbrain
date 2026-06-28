@@ -43,7 +43,7 @@ graph LR
 
 | Module | Responsibility |
 |:--|:--|
-| `src/core/engine.ts` | BrainEngine contract (~67 ops) |
+| `src/core/engine.ts` | BrainEngine contract (以实际为准) |
 | `src/core/operations.ts` | Operation definitions + trust boundary |
 | `src/core/search/hybrid.ts` | Hybrid vector + keyword + RRF retrieval |
 | `src/core/ai/gateway.ts` | Unified AI chat/embed/rerank seam |

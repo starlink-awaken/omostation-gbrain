@@ -94,7 +94,7 @@ writing or reviewing an operation, consult `src/core/operations.ts` for the cont
 ## Before shipping
 
 Easiest path: `bun run ci:local` runs the full CI gate inside Docker (gitleaks,
-unit tests with `DATABASE_URL` unset, then all 29 E2E files sequentially against a
+unit tests with `DATABASE_URL` unset, then all E2E files (以实际为准) sequentially against a
 fresh pgvector container) and tears down. Use `bun run ci:local:diff` for the
 diff-aware subset during fast iteration on a focused branch. Requires Docker
 (Docker Desktop / OrbStack / Colima) and `gitleaks` (`brew install gitleaks`).
