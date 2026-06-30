@@ -89,7 +89,7 @@ for SHAPE in "${SHAPES[@]}"; do
   # a freshly walked-forward brain may have legitimate warnings (zero pages,
   # no embeddings, etc) that are not wedge-class failures. We do NOT accept
   # 'fail' or 'failures' (gbrain doctor's terminal-failure shape).
-  STATUS=$(grep -oE '"status"[[:space:]]*:[[:space:]]*"[^"]+"' "$DOCTOR_OUT" | head -1 | sed -E 's/.*"([^"]+)"$/\1/')
+  STATUS=$(grep -oE '"status"[[:space:]]*:[[:space:]]*"[^"]+"' "$DOCTOR_OUT" | head -1 | sed -E 's/.*"([^"]+)"$/\1/' || true)
   case "$STATUS" in
     ok|warn|warnings)
       echo "[pg_upgrade_matrix] OK: shape=$SHAPE → status=$STATUS" | tee -a "$LOG_FILE"

@@ -56,13 +56,13 @@ fi
 
 # Surface key numbers from the JSON. Awk wins here vs jq since jq isn't
 # guaranteed on every CI runner; the JSON shape is stable per the workload.
-A_P50=$(grep -oE '"phase_a"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p50_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$')
-A_P99=$(grep -oE '"phase_a"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p99_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$')
-B_P50=$(grep -oE '"phase_b"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p50_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$')
-B_P99=$(grep -oE '"phase_b"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p99_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$')
-DELTA_P99=$(grep -oE '"delta_p99_pct"[[:space:]]*:[[:space:]]*-?[0-9]+' "$WORKLOAD_OUT" | grep -oE '\-?[0-9]+$')
-VERDICT=$(grep -oE '"verdict"[[:space:]]*:[[:space:]]*"[^"]+"' "$WORKLOAD_OUT" | sed -E 's/.*"([^"]+)"$/\1/')
-WRITES_DONE=$(grep -oE '"writes_completed"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | grep -oE '[0-9]+$')
+A_P50=$(grep -oE '"phase_a"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p50_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$' || true)
+A_P99=$(grep -oE '"phase_a"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p99_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$' || true)
+B_P50=$(grep -oE '"phase_b"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p50_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$' || true)
+B_P99=$(grep -oE '"phase_b"[[:space:]]*:[[:space:]]*\{[^}]+\}' "$WORKLOAD_OUT" | grep -oE '"p99_ms"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$' || true)
+DELTA_P99=$(grep -oE '"delta_p99_pct"[[:space:]]*:[[:space:]]*-?[0-9]+' "$WORKLOAD_OUT" | grep -oE '\-?[0-9]+$' || true)
+VERDICT=$(grep -oE '"verdict"[[:space:]]*:[[:space:]]*"[^"]+"' "$WORKLOAD_OUT" | sed -E 's/.*"([^"]+)"$/\1/' || true)
+WRITES_DONE=$(grep -oE '"writes_completed"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | grep -oE '[0-9]+$' || true)
 
 echo "[read_latency] phase_a: p50=${A_P50}ms p99=${A_P99}ms"
 echo "[read_latency] phase_b: p50=${B_P50}ms p99=${B_P99}ms (writes_completed=${WRITES_DONE})"

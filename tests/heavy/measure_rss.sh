@@ -87,10 +87,10 @@ if [ "$WORKLOAD_RC" -ne 0 ]; then
 fi
 
 # Step 3: parse the workload output
-PEAK_KB=$(grep -oE '"peak_rss_kb"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | head -1 | grep -oE '[0-9]+$')
-MEASUREMENT_PATH=$(grep -oE '"measurement_path"[[:space:]]*:[[:space:]]*"[^"]+"' "$WORKLOAD_OUT" | head -1 | sed -E 's/.*"([^"]+)"$/\1/')
-QUERIES=$(grep -oE '"queries_run"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | head -1 | grep -oE '[0-9]+$')
-ELAPSED=$(grep -oE '"elapsed_ms"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | head -1 | grep -oE '[0-9]+$')
+PEAK_KB=$(grep -oE '"peak_rss_kb"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | head -1 | grep -oE '[0-9]+$' || true)
+MEASUREMENT_PATH=$(grep -oE '"measurement_path"[[:space:]]*:[[:space:]]*"[^"]+"' "$WORKLOAD_OUT" | head -1 | sed -E 's/.*"([^"]+)"$/\1/' || true)
+QUERIES=$(grep -oE '"queries_run"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | head -1 | grep -oE '[0-9]+$' || true)
+ELAPSED=$(grep -oE '"elapsed_ms"[[:space:]]*:[[:space:]]*[0-9]+' "$WORKLOAD_OUT" | head -1 | grep -oE '[0-9]+$' || true)
 
 echo "[measure_rss] peak_rss_kb=$PEAK_KB measurement_path=$MEASUREMENT_PATH queries=$QUERIES elapsed_ms=$ELAPSED"
 
