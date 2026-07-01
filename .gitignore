@@ -33,3 +33,7 @@ coverage/
 .omc/
 *.tmp
 __pycache__/
+
+# ── Runtime artifacts ──
+memu-brain.db*
+test/.cache/
