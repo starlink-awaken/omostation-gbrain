@@ -38,3 +38,7 @@
 - 项目源码：`projects/gbrain/`
 - 入口定义：`projects/gbrain/pyproject.toml` 或 `package.json`
 - 测试：`cd projects/gbrain && bun test`
+
+## 架构演进与项目边界索引
+
+参见工作区架构演进与项目边界：[`../../docs/ARCHITECTURE-EVOLUTION.md`](../../docs/ARCHITECTURE-EVOLUTION.md)
