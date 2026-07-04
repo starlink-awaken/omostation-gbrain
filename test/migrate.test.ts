@@ -625,11 +625,11 @@ describe('migrate v14 — pages_updated_at_index (handler-based, engine-aware)',
   });
 
   test('v14 handler source contains CONCURRENTLY + invalid-index cleanup for Postgres branch', async () => {
-    const { readFileSync } = await import('fs');
-    const src = readFileSync('src/core/migrate.ts', 'utf-8');
-    const v14Start = src.indexOf("name: 'pages_updated_at_index'");
-    expect(v14Start).toBeGreaterThan(-1);
-    const v14Block = src.slice(v14Start, v14Start + 3000);
+    const m14 = MIGRATIONS.find(m => m.version === 14);
+    expect(m14).toBeDefined();
+    expect(m14!.name).toBe('pages_updated_at_index');
+    // 拆分后 (F7114ABA Wave 2 3/7) migration 源在 migrate/migrations-*.ts, handler.toString() 鲁棒不依赖文件路径.
+    const v14Block = m14!.handler?.toString() ?? '';
     expect(v14Block).toContain('pg_index');
     expect(v14Block).toContain('indisvalid');
     expect(v14Block).toContain('DROP INDEX CONCURRENTLY IF EXISTS idx_pages_updated_at_desc');
@@ -737,11 +737,11 @@ describe('migrate v66 — embed_stale_partial_index (D6)', () => {
   });
 
   test('v66 handler source: CONCURRENTLY + invalid-index cleanup on Postgres branch', async () => {
-    const { readFileSync } = await import('fs');
-    const src = readFileSync('src/core/migrate.ts', 'utf-8');
-    const v66Start = src.indexOf("name: 'embed_stale_partial_index'");
-    expect(v66Start).toBeGreaterThan(-1);
-    const v66Block = src.slice(v66Start, v66Start + 3000);
+    const m66 = MIGRATIONS.find(m => m.version === 66);
+    expect(m66).toBeDefined();
+    expect(m66!.name).toBe('embed_stale_partial_index');
+    // 拆分后 (F7114ABA Wave 2 3/7) migration 源在 migrate/migrations-*.ts, handler.toString() 鲁棒不依赖文件路径.
+    const v66Block = m66!.handler?.toString() ?? '';
     expect(v66Block).toContain('pg_index');
     expect(v66Block).toContain('indisvalid');
     expect(v66Block).toContain('DROP INDEX CONCURRENTLY IF EXISTS idx_chunks_embedding_null');
