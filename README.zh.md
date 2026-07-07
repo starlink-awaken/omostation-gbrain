@@ -1,6 +1,4 @@
-# gbrain
-
-🌐 [简体中文](README.zh.md)
+# Gbrain
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -8,14 +6,11 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-runtime-black.svg)](https://bun.sh/)
 
-    > L2 · TypeScript 知识数据库与 brain runtime
-    > Metadata SSOT: [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml)
+## 项目定位
 
-    ## What It Owns
+Postgres 知识数据库（所属层级：L2；技术栈：TypeScript (bun)）。
 
-    TypeScript 知识数据库与 brain runtime.
-
-    ## Installation
+## 安装
 
 ```bash
 # Clone the workspace recursively
@@ -28,9 +23,9 @@ bun install
 
 Requires Bun and Node.js (see `package.json`).
 
-## Quick Start
+## 快速开始
 
-    ```bash
+```bash
     bun install
 bun test
 bun run verify
@@ -52,29 +47,27 @@ bun run ci:local
     - Workspace architecture: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
     - Layer placement: [`../../LAYER-INDEX.md`](../../LAYER-INDEX.md)
 
+## 文档
 
-## Notes
+- 英文 README: [`README.md`](README.md)
+- 贡献指南: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- 安全策略: [`SECURITY.md`](SECURITY.md)
+- 更新日志: [`CHANGELOG.md`](CHANGELOG.md)
+- 行为准则: [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
+- 贡献者名单: [`CONTRIBUTORS.md`](CONTRIBUTORS.md)
 
-- See upstream docs under docs/ for integrations, sync, OAuth, and skillpacks.
-- Respect privacy and trust-boundary checks before publishing examples.
-
-    ## SSOT Rules
-
-    Runtime facts, counts, ports, health, and generated inventories are intentionally not maintained here. Use the workspace registries and project source as the truth.
-## Project Governance
-
-- [Governance](GOVERNANCE.md)
-- [Support](SUPPORT.md)
-
-- [Contributing](CONTRIBUTING.md)
-- [Security Policy](SECURITY.md)
-- [Changelog](CHANGELOG.md)
-- [License](LICENSE)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Contributors](CONTRIBUTORS.md)
-## Getting Help
+## 获取帮助
 
 - [FAQ](docs/FAQ.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [API / Usage Reference](docs/API.md)
-- [Architecture Overview](docs/ARCHITECTURE.md)
+- [故障排查](docs/TROUBLESHOOTING.md)
+- [API / 使用参考](docs/API.md)
+- [架构概览](docs/ARCHITECTURE.md)
+
+
+---
+
+## 🌐 语言
+
+- [English](README.md)
+- [简体中文](README.zh.md)
+
