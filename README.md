@@ -13,7 +13,20 @@
 
     TypeScript 知识数据库与 brain runtime.
 
-    ## Quick Start
+    ## Installation
+
+```bash
+# Clone the workspace recursively
+git clone --recursive https://github.com/starlink-awaken/omostation.git
+cd omostation/projects/gbrain
+
+# Install dependencies with bun
+bun install
+```
+
+Requires Bun and Node.js (see `package.json`).
+
+## Quick Start
 
     ```bash
     bun install
@@ -53,6 +66,7 @@ bun run ci:local
 - [Changelog](CHANGELOG.md)
 - [License](LICENSE)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Contributors](CONTRIBUTORS.md)
 ## Getting Help
 
 - [FAQ](docs/FAQ.md)
