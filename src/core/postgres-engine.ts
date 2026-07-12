@@ -80,7 +80,7 @@ export function getPostgresSchema(
 // level (3-strikes-then-reconnect). The unit tests in
 // test/connection-resilience.test.ts retain a self-contained copy of the
 // helper so the regression-against-future-reintroduction guard still works.
-// See TODOS.md item: "err.code-based connection-error matching" for the
+// See (tracked TODO) item: "err.code-based connection-error matching" for the
 // follow-up that will reintroduce a typed retry mechanism.
 
 export class PostgresEngine implements BrainEngine {
@@ -2143,7 +2143,7 @@ export class PostgresEngine implements BrainEngine {
     // had both false-positive (organic count == cap) and false-negative
     // (LIMIT-before-DISTINCT in diamond graphs) cases caught by adversarial
     // review. Stripped pending the dedupe-then-cap SQL rewrite + real Postgres
-    // parity coverage. See TODOS.md → "T8 truncation signal".
+    // parity coverage. See (tracked TODO) → "T8 truncation signal".
 
     return rows.map((r: Record<string, unknown>) => ({
       slug: r.slug as string,

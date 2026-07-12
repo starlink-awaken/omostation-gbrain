@@ -38,7 +38,7 @@ import type {
  * cap) and false-negative (LIMIT-before-DISTINCT in diamond graphs) cases
  * caught by adversarial review. The signal is deferred until a
  * dedupe-then-cap SQL rewrite + real Postgres parity coverage lands. See
- * TODOS.md → "T8 truncation signal" entry. Callers that need to detect
+ * (tracked TODO) → "T8 truncation signal" entry. Callers that need to detect
  * truncation can compare `result.length` against expected fanout bounds
  * as a coarse-but-honest signal in the interim.
  */

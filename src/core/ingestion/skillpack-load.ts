@@ -29,7 +29,7 @@
  * Trust model (v1): sources are in-process, evaluated as TS/JS modules in
  * the daemon. The TOFU prompt during `gbrain skillpack scaffold` is the user
  * acknowledging they trust the source's code. Subprocess / VM isolation is
- * a v2 hardening wave — see TODOS.md.
+ * a v2 hardening wave — see (tracked TODO).
  *
  * Permissions are display-only in v1 (informational during install). The
  * field exists so future v2 isolation can enforce them at runtime without a

@@ -35,7 +35,7 @@ import type { Recipe } from '../types.ts';
  * hard-pins gbrain's subagent infra to Anthropic-direct (stable tool_use_id
  * across crashes/replays). OR-proxied Anthropic is rejected at submit time
  * regardless of this flag — relaxing the gate is a deeper architectural
- * change tracked in TODOS.md.
+ * change tracked in (tracked TODO).
  */
 export const openrouter: Recipe = {
   id: 'openrouter',
@@ -79,7 +79,7 @@ export const openrouter: Recipe = {
     chat: {
       // Curated entry points (verified against OR's catalog 2026-05-20). The
       // openai-compat tier does NOT enforce this list at runtime — users can
-      // pass any model ID OR routes. Refresh quarterly; see TODOS.md.
+      // pass any model ID OR routes. Refresh quarterly; see (tracked TODO).
       models: [
         'openai/gpt-5.2',
         'openai/gpt-5.2-chat',

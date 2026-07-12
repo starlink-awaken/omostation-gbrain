@@ -141,7 +141,7 @@ export function applyMemThetaBoost(
  *
  * 0.85 is a reasonable starting value for dense-embedder corpora. Default
  * stays undefined (no gate) until per-corpus ablation evidence supports a
- * default flip (see `TODOS.md` floor-ratio ablation entry).
+ * default flip (see `(tracked TODO)` floor-ratio ablation entry).
  */
 export function computeFloorThreshold(
   results: SearchResult[],

@@ -52,7 +52,7 @@ export interface ModeBundle {
   tokenBudget: number | undefined;
   /**
    * LLM multi-query expansion (Haiku call per search).
-   * Per CLAUDE.md TODOS the corpus eval shows ~97.6% lift relative to no
+   * Per CLAUDE.md, the corpus eval shows ~97.6% lift relative to no
    * expansion — barely measurable. Off for conservative/balanced;
    * on for tokenmax to preserve power-user retrieval ceiling.
    */
@@ -105,7 +105,7 @@ export interface ModeBundle {
    *
    * Sensible operator override values for dense-embedder corpora: 0.85-0.95.
    * Default stays undefined until per-corpus ablation evidence supports a
-   * mode-level default. See `TODOS.md` floor-ratio ablation entry.
+   * mode-level default. See `(tracked TODO)` floor-ratio ablation entry.
    *
    * Scoped to the three metadata boost stages — exact-match boost
    * (intent-weights.applyExactMatchBoost) runs independently as a lexical
@@ -188,7 +188,7 @@ export const MODE_BUNDLES: Readonly<Record<SearchMode, Readonly<ModeBundle>>> = 
     reranker_top_n_out: null,
     reranker_timeout_ms: 5000,
     // v0.35.6.0 — undefined for all three bundles; the per-corpus ablation
-    // (TODOS.md) gates any default flip.
+    // ((tracked TODO)) gates any default flip.
     floor_ratio: undefined,
     // v0.36 cross-modal defaults (same across all modes — opt-in)
     cross_modal_both_text_weight: 0.6,
@@ -221,7 +221,7 @@ export const MODE_BUNDLES: Readonly<Record<SearchMode, Readonly<ModeBundle>>> = 
     reranker_top_n_out: null,
     reranker_timeout_ms: 5000,
     // v0.35.6.0 — undefined for all three bundles; the per-corpus ablation
-    // (TODOS.md) gates any default flip.
+    // ((tracked TODO)) gates any default flip.
     floor_ratio: undefined,
     // v0.36 cross-modal defaults (same across all modes — opt-in)
     cross_modal_both_text_weight: 0.6,
@@ -251,7 +251,7 @@ export const MODE_BUNDLES: Readonly<Record<SearchMode, Readonly<ModeBundle>>> = 
     reranker_top_n_out: null,
     reranker_timeout_ms: 5000,
     // v0.35.6.0 — undefined for all three bundles; the per-corpus ablation
-    // (TODOS.md) gates any default flip.
+    // ((tracked TODO)) gates any default flip.
     floor_ratio: undefined,
     // v0.36 cross-modal defaults (same across all modes — opt-in)
     cross_modal_both_text_weight: 0.6,

@@ -2084,7 +2084,7 @@ export class PGLiteEngine implements BrainEngine {
     );
 
     // T8 truncation-detection callback stripped in /review — see
-    // postgres-engine.traverseGraph for the parallel comment + TODOS.md.
+    // postgres-engine.traverseGraph for the parallel comment + (tracked TODO).
 
     return (rows as Record<string, unknown>[]).map(r => ({
       slug: r.slug as string,
