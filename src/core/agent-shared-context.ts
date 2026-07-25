@@ -20,6 +20,17 @@ export interface SharedContextRecord extends SharedContextEntry {
   readers: AgentId[];
 }
 
+/** C3 collaboration product (Batch3, ADR-0237): 角色协作产物写入公共黑板. */
+export interface CollabProductEntry {
+  taskRef: string;
+  fromRole: string;
+  toRole: string | null;
+  messageType: string; // research_result | delivery_registered | handshake trail
+  correlationId?: string;
+  payload: string; // JSON-serialized
+  writer: AgentId;
+}
+
 /** In-process store keyed by scope (e.g. task-id or brain-id). */
 export class AgentSharedContextStore {
   private readonly byScope = new Map<string, Map<string, SharedContextRecord>>();
@@ -95,6 +106,55 @@ export class AgentSharedContextStore {
     const bucket = this.byScope.get(s);
     if (!bucket) return [];
     return [...bucket.values()].map(cloneRec);
+  }
+
+  // ─── C3: collaboration blackboard (Batch3, ADR-0237) ───
+
+  /**
+   * Write a collaboration product to the public blackboard.
+   * scope = taskRef; tags = [fromRole, messageType, toRole?]; readers empty
+   * → visible to all agents in scope (public blackboard, downstream reuse).
+   */
+  writeCollabProduct(entry: CollabProductEntry): SharedContextRecord {
+    if (!entry.taskRef?.trim()) throw new Error("taskRef is required");
+    if (!entry.fromRole?.trim()) throw new Error("fromRole is required");
+    if (!entry.messageType?.trim()) throw new Error("messageType is required");
+    const key = `${entry.messageType}:${entry.correlationId ?? entry.writer}:${Date.now()}`;
+    const tags = [entry.fromRole, entry.messageType];
+    if (entry.toRole) tags.push(entry.toRole);
+    return this.write(entry.writer, key, entry.payload, {
+      scope: entry.taskRef,
+      tags,
+    });
+  }
+
+  /**
+   * Retrieve collaboration products (cross-task when taskRef omitted).
+   * C3 跨任务上下文复用: 后续任务可检索前序协作产物 (by role / messageType).
+   */
+  retrieveCollab(
+    reader: AgentId,
+    opts: {
+      taskRef?: string;
+      fromRole?: string;
+      messageType?: string;
+      scope?: string;
+    } = {},
+  ): SharedContextRecord[] {
+    const scopes = opts.scope ?? opts.taskRef
+      ? [opts.scope ?? opts.taskRef!]
+      : [...this.byScope.keys()];
+    const out: SharedContextRecord[] = [];
+    for (const scope of scopes) {
+      const visible = this.listVisible(reader, { scope });
+      for (const rec of visible) {
+        const tags = rec.tags ?? [];
+        if (opts.fromRole && !tags.includes(opts.fromRole)) continue;
+        if (opts.messageType && !tags.includes(opts.messageType)) continue;
+        out.push(rec);
+      }
+    }
+    return out;
   }
 }
 

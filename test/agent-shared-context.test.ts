@@ -96,3 +96,91 @@ describe("KOS retrieve adapter", () => {
     expect(body).toContain("v");
   });
 });
+
+describe("C3 collaboration blackboard (ADR-0237)", () => {
+  test("writeCollabProduct writes to public blackboard with role tags", () => {
+    const store = new AgentSharedContextStore();
+    const rec = store.writeCollabProduct({
+      taskRef: "c3-task-1",
+      fromRole: "research",
+      toRole: "governance",
+      messageType: "research_result",
+      correlationId: "corr-1",
+      payload: JSON.stringify({ findings: "KOS hit 5 docs" }),
+      writer: "res-agent",
+    });
+    expect(rec.writer).toBe("res-agent");
+    expect(rec.tags).toContain("research");
+    expect(rec.tags).toContain("research_result");
+    expect(rec.tags).toContain("governance");
+  });
+
+  test("retrieveCollab cross-task reuse (C3 核心: 后续任务复用前序协作产物)", () => {
+    const store = new AgentSharedContextStore();
+    store.writeCollabProduct({
+      taskRef: "task-A",
+      fromRole: "research",
+      toRole: "governance",
+      messageType: "research_result",
+      payload: JSON.stringify({ f: "A" }),
+      writer: "res-1",
+    });
+    store.writeCollabProduct({
+      taskRef: "task-B",
+      fromRole: "delivery",
+      toRole: "governance",
+      messageType: "delivery_registered",
+      payload: JSON.stringify({ d: "B" }),
+      writer: "dly-1",
+    });
+    // 跨任务检索所有 research_result (taskRef 省略 → 全 scope)
+    const researchOnly = store.retrieveCollab("gov-agent", {
+      messageType: "research_result",
+    });
+    expect(researchOnly.length).toBe(1);
+    expect(researchOnly[0].tags).toContain("research");
+    // 全部协作产物
+    const all = store.retrieveCollab("gov-agent");
+    expect(all.length).toBe(2);
+  });
+
+  test("retrieveCollab filters by fromRole within taskRef", () => {
+    const store = new AgentSharedContextStore();
+    store.writeCollabProduct({
+      taskRef: "t1",
+      fromRole: "research",
+      toRole: null,
+      messageType: "research_result",
+      payload: "{}",
+      writer: "r",
+    });
+    store.writeCollabProduct({
+      taskRef: "t1",
+      fromRole: "delivery",
+      toRole: null,
+      messageType: "delivery_registered",
+      payload: "{}",
+      writer: "d",
+    });
+    const byRole = store.retrieveCollab("gov", {
+      taskRef: "t1",
+      fromRole: "delivery",
+    });
+    expect(byRole.length).toBe(1);
+    expect(byRole[0].tags).toContain("delivery");
+  });
+
+  test("writeCollabProduct validates required fields", () => {
+    const store = new AgentSharedContextStore();
+    expect(() =>
+      store.writeCollabProduct({
+        taskRef: "",
+        fromRole: "research",
+        toRole: null,
+        messageType: "x",
+        payload: "{}",
+        writer: "r",
+      }),
+    ).toThrow("taskRef is required");
+  });
+});
