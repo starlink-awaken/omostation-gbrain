@@ -244,7 +244,7 @@ describe('url_reachable resolver', () => {
   test('200 response → reachable=true', async () => {
     globalThis.fetch = (async () => new Response('', { status: 200 })) as unknown as typeof fetch;
     const r = await urlReachableResolver.resolve({
-      input: { url: 'https://example.com/ok' },
+      input: { url: 'https://8.8.8.8/ok' },
       context: makeCtx(),
     });
     expect(r.value.reachable).toBe(true);
@@ -254,7 +254,7 @@ describe('url_reachable resolver', () => {
   test('404 response → reachable=false with status + reason', async () => {
     globalThis.fetch = (async () => new Response('', { status: 404 })) as unknown as typeof fetch;
     const r = await urlReachableResolver.resolve({
-      input: { url: 'https://example.com/dead' },
+      input: { url: 'https://8.8.8.8/dead' },
       context: makeCtx(),
     });
     expect(r.value.reachable).toBe(false);
@@ -270,7 +270,7 @@ describe('url_reachable resolver', () => {
       return new Response('ok', { status: 200 });
     }) as unknown as typeof fetch;
     const r = await urlReachableResolver.resolve({
-      input: { url: 'https://example.com/post-only' },
+      input: { url: 'https://8.8.8.8/post-only' },
       context: makeCtx(),
     });
     expect(r.value.reachable).toBe(true);
@@ -279,17 +279,17 @@ describe('url_reachable resolver', () => {
 
   test('follows redirect to external URL', async () => {
     const responses = [
-      new Response('', { status: 301, headers: { location: 'https://example.org/final' } }),
+      new Response('', { status: 301, headers: { location: 'https://1.1.1.1/final' } }),
       new Response('', { status: 200 }),
     ];
     let i = 0;
     globalThis.fetch = (async () => responses[i++]) as unknown as typeof fetch;
     const r = await urlReachableResolver.resolve({
-      input: { url: 'https://example.com/redirect' },
+      input: { url: 'https://8.8.8.8/redirect' },
       context: makeCtx(),
     });
     expect(r.value.reachable).toBe(true);
-    expect(r.value.finalUrl).toBe('https://example.org/final');
+    expect(r.value.finalUrl).toBe('https://1.1.1.1/final');
   });
 
   test('blocks redirect to internal URL (per-hop SSRF revalidation)', async () => {
@@ -298,7 +298,7 @@ describe('url_reachable resolver', () => {
       headers: { location: 'http://127.0.0.1/admin' },
     })) as unknown as typeof fetch;
     const r = await urlReachableResolver.resolve({
-      input: { url: 'https://example.com/redirects-to-local' },
+      input: { url: 'https://8.8.8.8/redirects-to-local' },
       context: makeCtx(),
     });
     expect(r.value.reachable).toBe(false);
@@ -342,7 +342,7 @@ describe('url_reachable resolver', () => {
     ac.abort();
     try {
       await urlReachableResolver.resolve({
-        input: { url: 'https://example.com/' },
+      input: { url: 'https://8.8.8.8/' },
         context: makeCtx({ signal: ac.signal }),
       });
       throw new Error('should have thrown');
