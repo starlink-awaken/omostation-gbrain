@@ -32,7 +32,7 @@ Requires Bun and Node.js (see `package.json`).
 
     ```bash
     bun install
-bun test
+bun run test
 bun run verify
 bun run ci:local
     ```
