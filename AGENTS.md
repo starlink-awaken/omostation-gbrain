@@ -22,7 +22,7 @@
 
     ```bash
     bun install
-bun test
+bun run test
 bun run verify
 bun run ci:local
     ```
@@ -37,7 +37,7 @@ bun run ci:local
 
     ## Gotchas
 
-    - 信任边界是核心：远程 MCP 调用不能获得本地 CLI 权限。
+    - Trust boundary（信任边界）是核心：远程 MCP 调用不能获得本地 CLI 权限。
 - `测试输出不要通过 tail/head 截断，失败信息必须完整保留。`
 - `版本与发布规则以项目自身 VERSION/package/CHANGELOG 机制为准。`
 
@@ -49,6 +49,9 @@ bun run ci:local
 
     ## SSOT Pointers
 
+    - Agent installation: [`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md)
+    - Resolver contract: [`skills/RESOLVER.md`](skills/RESOLVER.md)
+    - LLM context index: [`llms.txt`](llms.txt)
     - Workspace architecture: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
     - Layer index: [`../../LAYER-INDEX.md`](../../LAYER-INDEX.md)
     - Project metadata: [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml)
