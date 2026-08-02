@@ -4,6 +4,7 @@ description: Track deep work sessions.
 triggers:
   - "deep work"
   - "focus session"
+  - "pomodoro"
 ---
 
 # Deep Work Tracker
