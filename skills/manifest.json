@@ -35,6 +35,16 @@
       "description": "Universal migration from Obsidian, Notion, Logseq, markdown, CSV, JSON, Roam"
     },
     {
+      "name": "deepwork-tracker",
+      "path": "deepwork-tracker/SKILL.md",
+      "description": "Track deep work sessions."
+    },
+    {
+      "name": "moltbook",
+      "path": "moltbook/SKILL.md",
+      "description": "Knowledge molting — brain page lifecycle."
+    },
+    {
       "name": "setup",
       "path": "setup/SKILL.md",
       "description": "Set up GBrain: auto-provision Supabase or PGLite, AGENTS.md injection, first import"
