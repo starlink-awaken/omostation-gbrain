@@ -150,14 +150,20 @@ describe('check-resolvable — unit: resolveSkillsDir', () => {
     // with mocked env to suppress the install-path success.
     const empty = mkdtempSync(join(tmpdir(), 'empty-for-resolve-'));
     const original = process.cwd();
+    const originalHome = process.env.HOME;
     try {
       process.chdir(empty);
+      // Neutralize ~/.openclaw/workspace detection (v0.37 tier) so the
+      // install-path fallback is what fires — machine-independent.
+      process.env.HOME = mkdtempSync(join(tmpdir(), 'cr-fake-home-'));
       const r = resolveSkillsDir({ help: false, json: false, fix: false, dryRun: false, verbose: false, strict: false, skillsDir: null });
       // Install-path fallback succeeds when test runs inside the gbrain repo.
       expect(r.error).toBeNull();
       expect(r.dir).toMatch(/\/skills$/);
       expect(r.source).toBe('install_path');
     } finally {
+      if (originalHome === undefined) delete process.env.HOME;
+      else process.env.HOME = originalHome;
       process.chdir(original);
       rmSync(empty, { recursive: true, force: true });
     }
@@ -383,7 +389,14 @@ describe('gbrain check-resolvable CLI — integration', () => {
       // Pass --fix; expect refusal exit + clear error message.
       const r = spawnSync('bun', ['run', CLI, 'check-resolvable', '--fix'], {
         cwd: empty,
-        env: { ...process.env, OPENCLAW_WORKSPACE: '', GBRAIN_SKILLS_DIR: '' },
+        // HOME → fake temp dir so ~/.openclaw/workspace (v0.37 detection tier)
+        // cannot intercept; install-path fallback is what fires.
+        env: {
+          ...process.env,
+          OPENCLAW_WORKSPACE: '',
+          GBRAIN_SKILLS_DIR: '',
+          HOME: mkdtempSync(join(tmpdir(), 'cr-fake-home-')),
+        },
         encoding: 'utf-8',
       });
       expect(r.status).toBe(1);

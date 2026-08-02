@@ -1,10 +1,17 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
+import { mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
 import { operationsByName } from '../src/core/operations.ts';
 
 let engine: PGLiteEngine;
 
 beforeAll(async () => {
+  // Isolate ALL file-plane state (v0.37 pin AppendOnlyLog, config.json) to a
+  // temp home so tests never read/write the real ~/.gbrain and runs don't
+  // leak state into each other (pins accumulate in the JSONL log otherwise).
+  process.env.GBRAIN_HOME = mkdtempSync(join(tmpdir(), 'gbrain-memory-tree-test-'));
   engine = new PGLiteEngine();
   await engine.connect({});
   await engine.initSchema();
@@ -66,8 +73,23 @@ describe('memory_tree operation', () => {
   });
 
   test('stats reports pinned count and totals', async () => {
-    await engine.setConfig('memory_tree.pins', JSON.stringify(['entity:gbrain']));
+    // v0.37 contract: pin state reads the AppendOnlyLog first (DB config is
+    // only a fallback when the log is empty). Start from an empty log (the
+    // JSONL accumulates across tests in this file), seed one pin via the op
+    // itself, then stats must report it.
+    const { readdirSync, unlinkSync } = await import('fs');
+    const { gbrainPath } = await import('../src/core/config.ts');
+    try {
+      for (const f of readdirSync(gbrainPath('audit'))) {
+        if (f.startsWith('memory-tree-pins-') && f.endsWith('.jsonl')) {
+          unlinkSync(gbrainPath('audit', f));
+        }
+      }
+    } catch {
+      // no audit dir yet — nothing to clear
+    }
     const op = operationsByName.memory_tree;
+    await op.handler({ engine } as any, { action: 'pin', node_ids: ['entity:gbrain'] }) as any;
     const stats = await op.handler(
       { engine } as any,
       { action: 'stats' },

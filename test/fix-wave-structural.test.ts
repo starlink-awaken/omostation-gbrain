@@ -46,12 +46,14 @@ describe('v0.36.1.x #1090 — admin embed two-tier resolution', () => {
     expect(src).toMatch(/useDevPath/);
   });
 
-  test('src/admin-embedded.ts is auto-generated with file: imports', () => {
+  test('src/admin-embedded.ts placeholder reflects the admin UI deprecation', () => {
     const src = readFileSync('src/admin-embedded.ts', 'utf8');
     expect(src).toMatch(/AUTO-GENERATED/);
-    expect(src).toMatch(/with \{ type: 'file' \}/);
+    // admin/ was removed 2026-06-24 — the module exports empty placeholders
+    // (no file: imports anymore) so serve-http falls back to 404 for /admin.
     expect(src).toMatch(/export const ADMIN_ASSETS/);
     expect(src).toMatch(/export const ADMIN_INDEX_HTML/);
+    expect(src).toContain('ADMIN_ASSET_COUNT = 0');
   });
 
   test('build script + CI guard exist', () => {

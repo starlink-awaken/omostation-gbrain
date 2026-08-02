@@ -608,7 +608,7 @@ describe('v0.31.8 op-handler ctx.sourceId threading', () => {
     await engine.putPage(DEL_SLUG, { type: 'concept', title: 'Testsrc', compiled_truth: '.' }, { sourceId: 'testsrc' });
 
     const op = getOp('delete_page');
-    await op.handler(makeCtx(engine, { sourceId: 'testsrc' }), { slug: DEL_SLUG });
+    await op.handler(makeCtx(engine, { sourceId: 'testsrc' }), { slug: DEL_SLUG, _confirmed: true });
 
     const rows = await engine.executeRaw<{ source_id: string; deleted_at: string | null }>(
       `SELECT source_id, deleted_at FROM pages WHERE slug = $1 ORDER BY source_id`,

@@ -92,15 +92,17 @@ describe('hybridSearch onMeta callback — expansion_applied', () => {
     expect(meta!.expansion_applied).toBe(false);
   });
 
-  test('expansion_applied stays boolean and never goes true when vector path is skipped', async () => {
+  test('expansion_applied reflects whether expansion actually ran, independent of vector path', async () => {
+    // Expansion runs before the vector attempt. On embed failure the search
+    // falls back to keyword-only, but the expanded query variants ARE used
+    // for that keyword pass — so the flag reports expansion execution, not
+    // vector availability (contract since v0.29 keyword-fallback rework).
     const meta = await runWithMeta('alice', {
       expansion: true,
       expandFn: async () => ['alice', 'alice example', 'the person alice'],
     });
     expect(typeof meta!.expansion_applied).toBe('boolean');
-    if (!meta!.vector_enabled) {
-      expect(meta!.expansion_applied).toBe(false);
-    }
+    expect(meta!.expansion_applied).toBe(true);
   });
 });
 

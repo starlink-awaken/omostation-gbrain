@@ -3,6 +3,7 @@ import { readFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 import { checkResolvable } from "../src/core/check-resolvable.ts";
 import { PROTECTED_JOB_NAMES } from "../src/core/minions/protected-names.ts";
+import { operationsByName } from "../src/core/operations.ts";
 
 const SKILLS_DIR = join(import.meta.dir, "..", "skills");
 const RESOLVER_PATH = join(SKILLS_DIR, "RESOLVER.md");
@@ -143,10 +144,15 @@ describe("RESOLVER.md trigger round-trip (D5/C)", () => {
 // bugs where docs reference handler names that don't exist (e.g., the
 // `name="research"` / `name="orchestrate"` bug from PR #381 pre-reframe).
 describe("Skill example-name validator (D13)", () => {
+  // operations.ts was decomposed into operations/ domain modules (2026-06-20);
+  // the barrel no longer contains `name:` lines. Extract live names from the
+  // registry instead of regex-scanning the source file.
   const opNames: string[] = (() => {
-    if (!existsSync(OPERATIONS_PATH)) return [];
-    const content = readFileSync(OPERATIONS_PATH, "utf-8");
-    return Array.from(content.matchAll(/^\s+name:\s*'([a-z_]+)',/gm)).map(m => m[1]);
+    try {
+      return Object.keys(operationsByName);
+    } catch {
+      return [];
+    }
   })();
 
   const knownNames = new Set<string>([...opNames, ...PROTECTED_JOB_NAMES]);
