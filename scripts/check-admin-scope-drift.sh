@@ -15,7 +15,16 @@ SRC=src/core/scope.ts
 ADMIN=admin/src/lib/scope-constants.ts
 
 [ -f "$SRC" ] || { echo "[check-admin-scope-drift] missing $SRC" >&2; exit 2; }
-[ -f "$ADMIN" ] || { echo "[check-admin-scope-drift] missing $ADMIN" >&2; exit 2; }
+if [ ! -f "$ADMIN" ]; then
+  # admin/ SPA was removed 2026-06-24; nothing left to drift against.
+  # Mirror check-admin-build.sh's skip so `bun run verify` stays green.
+  if [ ! -d admin ]; then
+    echo "[check-admin-scope-drift] no admin/ directory, skipping" >&2
+    exit 0
+  fi
+  echo "[check-admin-scope-drift] missing $ADMIN" >&2
+  exit 2
+fi
 
 # Extract the contents of ALLOWED_SCOPES_LIST = [...] from each file.
 # The list spans multiple lines, terminated by ']'. awk pulls it cleanly.

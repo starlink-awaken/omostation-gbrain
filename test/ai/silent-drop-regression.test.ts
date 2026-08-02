@@ -6,7 +6,7 @@
  * different provider. This test ensures all three sites now check
  * gateway.isAvailable('embedding') instead of hardcoded OPENAI_API_KEY.
  *
- *   1. src/core/operations.ts:237 (put_page handler)
+ *   1. src/core/operations/pages.ts:152 (put_page handler)
  *   2. src/core/search/hybrid.ts:81 (vector search gate)
  *   3. src/core/import-file.ts:112 (chunk embedding in import pipeline)
  *
@@ -20,7 +20,9 @@ import { resolve } from 'path';
 
 // Resolve relative to this test file so it works on any machine + in CI.
 const REPO_ROOT = resolve(import.meta.dir, '../..');
-const OPS = resolve(REPO_ROOT, 'src/core/operations.ts');
+// operations.ts is a barrel since the 2026-06-20 split (DEBT-GBRAIN-OPERATIONS-TS);
+// the put_page handler lives in the pages domain module.
+const OPS = resolve(REPO_ROOT, 'src/core/operations/pages.ts');
 const HYBRID = resolve(REPO_ROOT, 'src/core/search/hybrid.ts');
 const IMPORT_FILE = resolve(REPO_ROOT, 'src/core/import-file.ts');
 
