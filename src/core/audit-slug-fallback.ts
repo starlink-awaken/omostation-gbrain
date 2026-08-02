@@ -36,7 +36,7 @@ export type SlugFallbackAuditEvent = z.infer<typeof SlugFallbackAuditEventSchema
 
 const slugFallbackLog = (): AppendOnlyLog =>
   new AppendOnlyLog({
-    filePath: resolveAuditDir() + '/slug-fallback-{YYYY-Www}.jsonl',
+    filePath: resolveAuditDir() + '/{YYYY-Www}',
     prefix: 'slug-fallback',
     schema: SlugFallbackAuditEventSchema,
   });

@@ -79,16 +79,23 @@ function extractAlterAddColumnsFromSql(sql: string): Array<{ table: string; colu
  * names the table.column; the contributor can grep for it in migrate.ts).
  */
 export function extractAddedColumnsFromMigrations(): AddedColumnRef[] {
-  const migratePath = resolve(process.cwd(), 'src/core/migrate.ts');
-  const source = readFileSync(migratePath, 'utf-8');
-
+  // migrate.ts is a barrel since the migration split; scan every file in
+  // src/core/migrate/ (early/mid1/mid2/late) plus the barrel itself.
+  const { readdirSync } = require('fs') as typeof import('fs');
+  const migrateDir = resolve(process.cwd(), 'src/core/migrate');
   const seen = new Set<string>();
   const result: AddedColumnRef[] = [];
-  for (const ref of extractAlterAddColumnsFromSql(source)) {
-    const key = `${ref.table}.${ref.column}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    result.push(ref);
+  const absorb = (source: string) => {
+    for (const ref of extractAlterAddColumnsFromSql(source)) {
+      const key = `${ref.table}.${ref.column}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(ref);
+    }
+  };
+  absorb(readFileSync(resolve(process.cwd(), 'src/core/migrate.ts'), 'utf-8'));
+  for (const f of readdirSync(migrateDir)) {
+    if (f.endsWith('.ts')) absorb(readFileSync(resolve(migrateDir, f), 'utf-8'));
   }
   return result;
 }

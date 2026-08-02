@@ -50,7 +50,7 @@ export interface PhantomAuditEvent extends z.infer<typeof PhantomAuditEventSchem
 
 const phantomLog = (): AppendOnlyLog =>
   new AppendOnlyLog({
-    filePath: resolveAuditDir() + '/phantoms-{YYYY-Www}.jsonl',
+    filePath: resolveAuditDir() + '/{YYYY-Www}',
     prefix: 'phantoms',
     schema: PhantomAuditEventSchema,
   });

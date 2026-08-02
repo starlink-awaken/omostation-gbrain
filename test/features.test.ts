@@ -86,7 +86,8 @@ describe('CLI routing', () => {
   });
 
   it('help text mentions features', async () => {
-    const cliSource = await Bun.file('src/cli.ts').text();
-    expect(cliSource).toContain('features [--json] [--auto-fix]');
+    // v0.37: CLI usage text moved from cli.ts into cli-help.ts (help surface).
+    const helpSource = await Bun.file('src/core/cli-help.ts').text();
+    expect(helpSource).toContain('features [--json] [--auto-fix]');
   });
 });

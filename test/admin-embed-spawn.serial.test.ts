@@ -136,53 +136,40 @@ async function spawnServer(): Promise<ServeProc> {
 }
 
 describe('admin embed E2E — /admin served from embedded manifest (v0.36.1.x #1090)', () => {
-  test('GET /admin/ returns 200 with the React SPA shell HTML', async () => {
+  test('GET /admin/ returns 404 after admin UI deprecation (2026-06-24)', async () => {
     const s = await spawnServer();
     try {
       const res = await fetch(`http://127.0.0.1:${s.port}/admin/`, {
         signal: AbortSignal.timeout(5000),
       });
-      expect(res.status).toBe(200);
-      const html = await res.text();
-      // The actual admin/dist/index.html declares <title>GBrain Admin</title>
-      // and mounts the SPA on <div id="root">. Both must be present, otherwise
-      // we're not serving the embedded asset.
-      expect(html).toContain('GBrain Admin');
-      expect(html).toContain('<div id="root">');
-      // Content-Type is text/html, not application/octet-stream (which would
-      // mean the mime lookup in ADMIN_ASSETS regressed).
-      expect(res.headers.get('content-type') ?? '').toMatch(/text\/html/);
+      // admin/ directory was removed 2026-06-24 (gbrain UI deprecation);
+      // admin-embedded.ts exports empty placeholders so serve-http falls
+      // back to 404 for /admin routes instead of serving a stale SPA.
+      expect(res.status).toBe(404);
     } finally {
       await s.cleanup();
     }
   }, 90_000);
 
-  test('GET /admin/index.html (explicit path) also returns the SPA HTML', async () => {
+  test('GET /admin/index.html (explicit path) also 404s after deprecation', async () => {
     const s = await spawnServer();
     try {
       const res = await fetch(`http://127.0.0.1:${s.port}/admin/index.html`, {
         signal: AbortSignal.timeout(5000),
       });
-      expect(res.status).toBe(200);
-      const html = await res.text();
-      expect(html).toContain('GBrain Admin');
+      expect(res.status).toBe(404);
     } finally {
       await s.cleanup();
     }
   }, 90_000);
 
-  test('GET /admin/agents (SPA-routed deep link) falls back to index.html', async () => {
+  test('GET /admin/agents (deep link) also 404s after deprecation', async () => {
     const s = await spawnServer();
     try {
       const res = await fetch(`http://127.0.0.1:${s.port}/admin/agents`, {
         signal: AbortSignal.timeout(5000),
       });
-      expect(res.status).toBe(200);
-      const html = await res.text();
-      // SPA fallback: any unmatched /admin/* path serves index.html so
-      // client-side routing takes over.
-      expect(html).toContain('GBrain Admin');
-      expect(html).toContain('<div id="root">');
+      expect(res.status).toBe(404);
     } finally {
       await s.cleanup();
     }

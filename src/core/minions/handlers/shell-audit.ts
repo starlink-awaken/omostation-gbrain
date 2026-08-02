@@ -32,7 +32,7 @@ export type ShellAuditEvent = z.infer<typeof ShellAuditEventSchema>;
 
 const shellLog = (): AppendOnlyLog =>
   new AppendOnlyLog({
-    filePath: resolveAuditDir() + '/shell-jobs-{YYYY-Www}.jsonl',
+    filePath: resolveAuditDir() + '/{YYYY-Www}',
     prefix: 'shell-jobs',
     schema: ShellAuditEventSchema,
   });

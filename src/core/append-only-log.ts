@@ -125,13 +125,20 @@ export class AppendOnlyLog {
         }
       }
       // 序列化（按 key 排序，§12.1.4 跨仓 4 不变量）
-      const line = JSON.stringify(
-        parsed.data,
-        Object.keys(parsed.data as object).sort(),
-        0,
-      );
+      // Replacer 必须是函数而非 key 数组：数组 replacer 会递归作用于嵌套对象，
+      // 只保留顶层 key 集合里的名字，导致 candidates 等嵌套对象字段被静默丢弃
+      // （写入 [{},{}]，读端 schema 校验失败 → audit 事件丢失）。
+      const sortedKeysReplacer = (_key: string, value: unknown): unknown => {
+        if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+          return Object.fromEntries(
+            Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)),
+          );
+        }
+        return value;
+      };
+      const line = JSON.stringify(parsed.data, sortedKeysReplacer, 0);
       lines.push(line);
-      // 注意：上面 sortKeys 分支未使用（JSON.stringify 第二参数就是 sort_keys），
+      // 注意：上面 sortKeys 分支未使用（replacer 已按 sort_keys 处理），
       // 但保留变量以应对未来 sortKeys=false 的扩展。
       void sortKeys;
     }

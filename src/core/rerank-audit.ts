@@ -56,7 +56,7 @@ export interface RerankFailureEvent extends z.infer<typeof RerankFailureEventSch
 
 const rerankLog = (): AppendOnlyLog =>
   new AppendOnlyLog({
-    filePath: resolveAuditDir() + '/rerank-failures-{YYYY-Www}.jsonl',
+    filePath: resolveAuditDir() + '/{YYYY-Www}',
     prefix: 'rerank-failures',
     schema: RerankFailureEventSchema,
   });
