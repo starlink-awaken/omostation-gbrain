@@ -12,6 +12,7 @@
 
 import { test, expect, describe, beforeAll, afterAll } from 'bun:test';
 import { PGLiteEngine } from '../src/core/pglite-engine.ts';
+import { configureGateway } from '../src/core/ai/gateway.ts';
 import {
   readContentChunksEmbeddingDim,
   embeddingMismatchMessage,
@@ -27,6 +28,16 @@ import {
 let engine: PGLiteEngine;
 
 beforeAll(async () => {
+  // Pin 1536-d BEFORE initSchema. The bunfig preload normally provides
+  // this, but sibling files in the same shard process may configure the
+  // gateway to ZE/1280 in their own beforeAll, racing this one (bun runs
+  // files in a shard concurrently). Self-configuring makes the schema
+  // column deterministic regardless of inter-file ordering.
+  configureGateway({
+    embedding_model: 'openai:text-embedding-3-large',
+    embedding_dimensions: 1536,
+    env: { ...process.env },
+  });
   engine = new PGLiteEngine();
   await engine.connect({});
   await engine.initSchema();
