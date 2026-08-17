@@ -121,7 +121,9 @@ describe('Bug 11 — orphan_pages is "no inbound links"', () => {
 
 describe('Bug 11 — doctor renders brain_score breakdown', () => {
   test('doctor source contains brain_score breakdown rendering', async () => {
-    const source = await Bun.file(new URL('../src/commands/doctor.ts', import.meta.url)).text();
+    // BET-Y1Q3-T6-04 split the doctor god-module; the breakdown rendering now
+    // lives in doctor-db-data-checks.ts.
+    const source = await Bun.file(new URL('../src/commands/doctor-db-data-checks.ts', import.meta.url)).text();
     expect(source).toContain('brain_score');
     expect(source).toContain('embed_coverage_score');
     expect(source).toContain('link_density_score');

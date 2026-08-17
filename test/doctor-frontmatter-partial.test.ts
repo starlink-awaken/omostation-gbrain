@@ -18,10 +18,18 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const DOCTOR_SOURCE = readFileSync(
-  join(__dirname, '..', 'src', 'commands', 'doctor.ts'),
-  'utf8',
-);
+// BET-Y1Q3-T6-04 split the doctor god-module; read the concatenated source.
+const DOCTOR_FILES = [
+  'doctor.ts',
+  'doctor-checks.ts',
+  'doctor-db-conn-checks.ts',
+  'doctor-db-data-checks.ts',
+  'doctor-remediate.ts',
+  'doctor-types.ts',
+];
+const DOCTOR_SOURCE = DOCTOR_FILES.map((f) =>
+  readFileSync(join(__dirname, '..', 'src', 'commands', f), 'utf8'),
+).join('\n');
 
 describe('doctor frontmatter_integrity — structural rendering (source-grep)', () => {
   test('source contains GBRAIN_DOCTOR_FM_TIMEOUT_MS handling', () => {
