@@ -23,7 +23,7 @@
 
 import { describe, test, expect } from 'bun:test';
 
-const GATEWAY_PATH = new URL('../../src/core/ai/gateway.ts', import.meta.url);
+const GATEWAY_PATH = new URL('../../src/core/ai/gateway-embed.ts', import.meta.url);
 
 describe('zeroEntropyCompatFetch — shim structural shape', () => {
   test('declared at module scope alongside voyageCompatFetch', async () => {
