@@ -327,7 +327,9 @@ describe('Lane E.4 — loadRecommendationContext is provider-aware', () => {
   // `doctor --remediation-plan` output uses) is brittle. Use a
   // source-text assertion instead.
   test('source-text grep: loadRecommendationContext recognizes ZE alongside OpenAI', () => {
-    const src = readFileSync(join(__dirname, '..', 'src', 'commands', 'doctor.ts'), 'utf-8');
+    // BET-Y1Q3-T6-04 split the doctor god-module; loadRecommendationContext
+    // now lives in doctor-remediate.ts. Read the concatenated doctor source.
+    const src = readFileSync(join(__dirname, '..', 'src', 'commands', 'doctor-remediate.ts'), 'utf-8');
     // Pre-fix this function read DB config + OpenAI-only key check.
     // Post-fix it reads gateway + branches on provider for the key.
     const fnIdx = src.indexOf('async function loadRecommendationContext');

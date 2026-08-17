@@ -17,6 +17,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { readDoctorSources } from './helpers/doctor-sources.ts';
 import { mkdtempSync, rmSync, readFileSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
@@ -124,7 +125,7 @@ describe('Bug 9 — sync-failures JSONL helpers', () => {
 
 describe('Bug 9 — doctor surfaces sync failures', () => {
   test('doctor source contains sync_failures check', async () => {
-    const source = await Bun.file(new URL('../src/commands/doctor.ts', import.meta.url)).text();
+    const source = await readDoctorSources();
     expect(source).toContain('sync_failures');
     expect(source).toContain('unacknowledgedSyncFailures');
     expect(source).toContain("'gbrain sync --skip-failed'");
