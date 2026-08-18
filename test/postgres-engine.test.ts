@@ -25,10 +25,16 @@ import { describe, test, expect } from 'bun:test';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const SRC = readFileSync(
-  join(import.meta.dir, '..', 'src', 'core', 'postgres-engine.ts'),
-  'utf-8',
-);
+// BET-Y1Q3-T6-04 split the engine into mixin files; read the concatenated source.
+const ENGINE_FILES = [
+  'postgres-engine.ts',
+  'postgres-engine-pages.ts',
+  'postgres-engine-links.ts',
+  'postgres-engine-takes.ts',
+];
+const SRC = ENGINE_FILES.map((f) =>
+  readFileSync(join(import.meta.dir, '..', 'src', 'core', f), 'utf-8'),
+).join('\n');
 
 describe('postgres-engine / search path timeout isolation', () => {
   test('no bare `SET statement_timeout` statement survives', () => {
@@ -104,8 +110,12 @@ function stripComments(s: string): string {
 // its opening line. Returns the method body up to the matching closing
 // brace. Good enough for the small number of methods in this file.
 function extractMethod(source: string, name: string): string {
-  // Find "async <name>(" at method-definition indentation (2 spaces).
-  const openRe = new RegExp(`^\\s+async\\s+${name}\\s*\\(`, 'm');
+  // Match either the classic class form `  async <name>(` or the mixin
+  // form `  name: async function(` (BET-Y1Q3-T6-04 split).
+  const openRe = new RegExp(
+    `^\\s+${name}\\s*:\\s*async\\s+function\\(|^\\s+async\\s+${name}\\s*\\(`,
+    'm',
+  );
   const match = openRe.exec(source);
   if (!match) {
     throw new Error(`method ${name} not found in postgres-engine.ts`);
