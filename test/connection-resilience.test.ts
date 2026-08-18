@@ -281,7 +281,14 @@ import { resolve } from 'path';
 
 describe('Eng-review D3 — executeRaw has no per-call retry wrapper', () => {
   it('PostgresEngine.executeRaw is a single-statement passthrough (no try/catch on connection errors)', () => {
-    const src = readFileSync(resolve('src/core/postgres-engine.ts'), 'utf-8');
+    const src = [
+  'postgres-engine.ts',
+  'postgres-engine-pages.ts',
+  'postgres-engine-links.ts',
+  'postgres-engine-takes.ts',
+]
+  .map((f) => readFileSync(resolve('src/core', f), 'utf-8'))
+  .join('\n');
 
     // Find the executeRaw method in the class (not the helper inside withReservedConnection)
     // Pattern: must be a method on the class taking (sql, params)
@@ -299,8 +306,16 @@ describe('Eng-review D3 — executeRaw has no per-call retry wrapper', () => {
   });
 
   it('PostgresEngine.reconnect() still exists for supervisor-driven recovery', () => {
-    const src = readFileSync(resolve('src/core/postgres-engine.ts'), 'utf-8');
-    expect(src).toContain('async reconnect()');
+    const src = [
+  'postgres-engine.ts',
+  'postgres-engine-pages.ts',
+  'postgres-engine-links.ts',
+  'postgres-engine-takes.ts',
+]
+  .map((f) => readFileSync(resolve('src/core', f), 'utf-8'))
+  .join('\n');
+    // BET-Y1Q3-T6-04: reconnect moved to postgres-engine-takes.ts as a mixin method.
+    expect(src).toMatch(/reconnect:\s*async\s+function\(/);
     expect(src).toContain('await this.disconnect()');
   });
 
