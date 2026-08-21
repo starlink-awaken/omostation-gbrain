@@ -109,7 +109,9 @@ describeE2E('E2E: Page CRUD', () => {
   });
 
   test('delete_page removes page and others survive', async () => {
-    await callOp('delete_page', { slug: 'sources/crustdata-sarah-chen' });
+    // delete_page is an L2 destructive operation: it requires _confirmed=true
+    // (added v0.31.8 D7), otherwise the handler throws permission_denied.
+    await callOp('delete_page', { slug: 'sources/crustdata-sarah-chen', _confirmed: true });
     const stats = await callOp('get_stats') as any;
     expect(stats.page_count).toBe(15);
 
