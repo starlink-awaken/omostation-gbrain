@@ -583,8 +583,13 @@ export function configDir(): string {
   // setting GBRAIN_HOME=/tmp/x yields configDir() === '/tmp/x/.gbrain'.
   // Validates the override: must be absolute, no '..' segments.
   const override = process.env.GBRAIN_HOME;
-  if (override && override.trim()) {
-    const trimmed = override.trim();
+  // Some CI runners inject the literal string "undefined" for unset env vars;
+  // treat it as unset so configDir() falls back to the real homedir instead
+  // of throwing (regression: test shards 3/4 failed with "must be an absolute
+  // path; got: undefined" on GitHub Actions).
+  const trimmedOverride = override && override.trim();
+  if (trimmedOverride && trimmedOverride !== 'undefined') {
+    const trimmed = trimmedOverride;
     if (!isAbsolute(trimmed)) {
       throw new Error(`GBRAIN_HOME must be an absolute path; got: ${trimmed}`);
     }
