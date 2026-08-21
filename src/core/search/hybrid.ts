@@ -767,7 +767,11 @@ export async function hybridSearch(
     emitMeta({
       vector_enabled: false,
       detail_resolved: detailResolved,
-      expansion_applied: expansionApplied,
+      // Embedding/vector did not run (this is the fallback-to-keyword path),
+      // so even if expandFn produced variants they were never used in
+      // scoring. Report expansion_applied=false here — mirroring the
+      // no-embed path above — so the meta flag stays accurate for callers.
+      expansion_applied: false,
       intent: suggestions.intent,
       mode: resolvedMode.resolved_mode,
       embedding_column: resolvedCol.name,
