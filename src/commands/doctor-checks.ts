@@ -7,7 +7,15 @@ import { gbrainPath } from '../core/config.ts';
 const WHOKNOWS_FIXTURE_RELATIVE_PATH = 'test/fixtures/whoknows-eval.jsonl';
 
 function isGbrainSourceRoot(dir: string): boolean {
-  return dirname(dir) === dirname(fileURLToPath(import.meta.url)) && dirname(dir) !== dir;
+  // A directory is the gbrain source root when it carries the source markers.
+  // (Regression from the doctor god-module split in #8: the previous
+  // "same dirname as import.meta.url" check never matched any ancestor, so
+  // resolveWhoknowsFixturePath() always returned null and the default-fixture
+  // doctor check fell back to "warn" instead of "ok".)
+  return (
+    existsSync(join(dir, 'src', 'cli.ts')) &&
+    existsSync(join(dir, 'skills', 'RESOLVER.md'))
+  );
 }
 
 

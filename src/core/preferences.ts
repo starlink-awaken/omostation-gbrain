@@ -40,7 +40,12 @@ function gbrainDir(): string {
   const override = process.env.GBRAIN_HOME;
   if (override) {
     const trimmed = override.trim();
-    if (trimmed) return trimmed;
+    // CI runners may inject the literal string "undefined" for unset env
+    // vars; treat it as unset here too (mirrors src/core/config.ts:
+    // configDir()), otherwise the migration ledger + preferences would be
+    // looked up under a literal "undefined/" directory and doctor's
+    // filesystem checks would silently miss them.
+    if (trimmed && trimmed !== 'undefined') return trimmed;
   }
   return join(home(), '.gbrain');
 }
