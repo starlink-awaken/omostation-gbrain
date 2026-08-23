@@ -93,7 +93,10 @@ timeout 120s bun run src/cli.ts init --pglite --yes --no-embedding >> "$LOG" 2>&
 # Register the brain dir as a source. Use raw SQL since `gbrain sources add`
 # might not exist in this version-window; the schema is what doctor reads.
 echo "[fm_wallclock] register source..." | tee -a "$LOG"
-bun run -e "
+# NOTE: use `bun -e` (not `bun run -e`): `bun run` does not accept an
+# inline `-e` eval argument and prints usage / exits non-zero, which broke
+# this heavy test on every CI run (bun 1.3.x + latest).
+bun -e "
 import { PGLiteEngine } from './src/core/pglite-engine.ts';
 const e = new PGLiteEngine();
 await e.connect({});
