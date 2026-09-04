@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # tests/heavy/
 
 Heavy ops-shape tests. Shell scripts that exercise gbrain end-to-end against

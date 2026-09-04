@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # functional-area-resolver A/B eval
 
 Maintainer-side eval evidence for the `functional-area-resolver` skill. Lives

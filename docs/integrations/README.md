@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Getting Data Into Your Brain
 
 GBrain is the retrieval layer. But retrieval is only as good as what you put in.

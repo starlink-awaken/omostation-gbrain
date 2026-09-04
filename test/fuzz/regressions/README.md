@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # test/fuzz/regressions/
 
 Pinned fuzz failures. Anything `pure-validators.test.ts` or

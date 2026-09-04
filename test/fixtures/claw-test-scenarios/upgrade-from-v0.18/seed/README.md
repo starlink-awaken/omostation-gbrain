@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # v0.18 seed
 
 This directory ships in v1 as **scaffolding only** — `dump.sql` will contain a real v0.18-shape PGLite SQL dump in v1.1. Until then the harness treats the absent dump as a no-op seed and the upgrade scenario behaves like a fresh-install scenario for the test gate.
