@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Agent onboarding — what to do with the files in this directory
 
 You (the agent) are running on a host that scaffolded gbrain skills here. This

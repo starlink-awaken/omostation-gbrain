@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Calibration extract-takes corpus (v0.36.1.0 / D13' / D19)
 
 **Privacy contract:** every page in this corpus is SYNTHETIC. None of these

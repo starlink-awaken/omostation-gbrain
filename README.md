@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain
 
 Your AI agent is smart but forgetful. GBrain gives it a brain.

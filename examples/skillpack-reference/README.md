@@ -1,3 +1,10 @@
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # reference-pack
 
 The canonical 10/10 reference for a third-party gbrain skillpack. This
