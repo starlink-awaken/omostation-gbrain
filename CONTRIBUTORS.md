@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # gbrain Contributors
 
 This project is part of the [omostation](https://github.com/starlink-awaken/omostation) workspace.

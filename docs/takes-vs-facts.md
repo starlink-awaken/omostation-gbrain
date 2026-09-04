@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Takes vs Facts — Architectural Distinction
 
 gbrain has two epistemological storage layers that serve different purposes.

@@ -1,9 +1,13 @@
 ---
+type: ssot
 name: frontmatter-guard
 version: 1.0.0
 description: |
   Validate and auto-repair YAML frontmatter on brain pages. Catches malformed
-  pages before they enter the brain (missing closing ---, nested quotes, slug
+  pages before they enter the brain (missing closing 
+owner: governance-team
+last-reviewed: 2026-09-04
+---, nested quotes, slug
   mismatches, null bytes, empty frontmatter, YAML parse failures). Wraps the
   `gbrain frontmatter` CLI for agent-driven workflows.
 triggers:

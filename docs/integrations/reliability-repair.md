@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Reliability repair (v0.12.2)
 
 If you ran v0.12.0 on real Postgres or Supabase, two bugs may have corrupted

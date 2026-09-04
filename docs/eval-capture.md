@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Eval capture — NDJSON schema reference
 
 **Status:** stable from v0.21.0. Schema versioning via `schema_version`

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Minions Worker Deployment Guide
 
 Keep `gbrain jobs work` running across crashes, reboots, and Postgres

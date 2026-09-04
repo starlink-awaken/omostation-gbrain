@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Deploy GBrain Remote MCP Server
 
 > **v0.26.0+:** `gbrain serve --http` ships full OAuth 2.1 (client credentials,

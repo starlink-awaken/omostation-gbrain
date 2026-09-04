@@ -1,9 +1,12 @@
 ---
+type: ssot
 name: compliant-callout
 description: External-lookup skill with canonical Convention callout
 triggers:
   - "research a person"
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # compliant-callout

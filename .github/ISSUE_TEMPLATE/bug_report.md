@@ -1,7 +1,10 @@
 ---
+type: ssot
 name: Bug Report
 about: Something isn't working
 labels: bug
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 **What happened?**

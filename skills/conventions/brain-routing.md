@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Brain Routing Convention
 
 Cross-cutting rules for which brain and which source an operation targets.

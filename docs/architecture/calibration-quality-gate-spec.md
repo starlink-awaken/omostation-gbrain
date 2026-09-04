@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Calibration Quality Gate — Falsifiability Filter + Category Classification
 
 > **Historical context.** This is the source spec absorbed from PR #1191 into

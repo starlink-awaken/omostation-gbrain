@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # gbrain — Architecture
 
 > **Layer**: L2 引擎面  

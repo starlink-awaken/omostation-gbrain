@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: capture
 description: Save any thought or content into the brain via one CLI command. The single human-facing entrypoint that replaces "put_page vs commit-then-sync vs autopilot-wait" with one command that just works.
 triggers:
@@ -10,6 +11,8 @@ triggers:
   - "save to brain"
 writes_pages:
   - "inbox/*"
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # capture — the single ingestion entrypoint

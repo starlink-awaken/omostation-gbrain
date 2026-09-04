@@ -1,8 +1,11 @@
 ---
+type: ssot
 name: compliant-position
 description: Skill that runs gbrain search before external lookup
 triggers:
   - "look up a topic"
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # compliant-position

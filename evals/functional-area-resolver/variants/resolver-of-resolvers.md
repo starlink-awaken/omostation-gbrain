@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 <!-- A/B EVAL FIXTURE — synthetic resolver shape, do not invoke from agent context. -->
 <!-- Variant: RESOLVER-OF-RESOLVERS — functional-areas WITHOUT the '(dispatcher for: ...)' clauses. This is the variant the skill describes as 'broken' — pipe-table compression that loses sub-skill visibility. -->
 

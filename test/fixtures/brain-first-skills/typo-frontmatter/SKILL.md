@@ -1,9 +1,12 @@
 ---
+type: ssot
 name: typo-frontmatter
 description: Skill with typo in brain_first declaration
 triggers:
   - "do a thing"
 brain-first: exempt
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # typo-frontmatter

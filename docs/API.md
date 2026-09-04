@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # gbrain API / Usage Reference
 
 > Quick reference for using **gbrain** programmatically and from the command line.

@@ -1,8 +1,11 @@
 ---
+type: ssot
 name: multi-pattern
 description: Skill that uses multiple external tools without compliance
 triggers:
   - "deep research"
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # multi-pattern

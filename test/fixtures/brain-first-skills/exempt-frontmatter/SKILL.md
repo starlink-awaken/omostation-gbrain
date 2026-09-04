@@ -1,10 +1,13 @@
 ---
+type: ssot
 name: exempt-frontmatter
 description: Pure-infra skill that opts out via frontmatter
 triggers:
   - "schedule a cron job"
 mutating: true
 brain_first: exempt
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # exempt-frontmatter

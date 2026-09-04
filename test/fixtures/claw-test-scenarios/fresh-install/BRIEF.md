@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Claw-test brief — fresh-install
 
 You are testing gbrain on a brand-new install. The user just ran `gbrain init` for the first time. Walk through the canonical first-day flow:

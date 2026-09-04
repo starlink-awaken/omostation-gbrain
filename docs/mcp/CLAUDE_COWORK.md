@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Connect GBrain to Claude Cowork
 
 Two ways to get GBrain into Cowork sessions:

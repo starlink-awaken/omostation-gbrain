@@ -1,8 +1,11 @@
 ---
+type: ssot
 name: negation-prose
 description: Skill where brain reference precedes a negation-prose mention
 triggers:
   - "do research"
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # negation-prose

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Progress events
 
 Canonical reference for the JSONL progress stream that `gbrain` writes to

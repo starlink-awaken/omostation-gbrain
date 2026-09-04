@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Skillpack Publish + Registry + Install Spec (post-v0.36.0.0)
 
 > **⚠️ Needs v0.36 realignment.** This spec was written assuming the pre-v0.36

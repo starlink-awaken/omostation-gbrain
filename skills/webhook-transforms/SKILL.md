@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: webhook-transforms
 version: 1.0.0
 description: |
@@ -14,6 +15,8 @@ tools:
   - add_timeline_entry
   - search
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Webhook Transforms

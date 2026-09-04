@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Friction protocol — convention
 
 > Cross-cutting rule shared by skills the claw-test harness exercises (setup,

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain Deployment Topologies
 
 GBrain supports three deployment shapes. They compose: a single user can mix

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Upgrading Downstream Agents
 
 GBrain ships skills in `skills/`. Downstream agents (custom OpenClaw deployments,

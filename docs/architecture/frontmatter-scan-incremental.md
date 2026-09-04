@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Frontmatter scan: DB-backed incremental state (Phase 2 design sketch)
 
 **Status:** Designed, not built. Captured here as the starting point for the

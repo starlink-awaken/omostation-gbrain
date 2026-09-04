@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Quiet Hours and Timezone-Aware Delivery
 
 ## Goal

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Two-Repo Architecture: Agent Behavior vs World Knowledge
 
 ## Goal

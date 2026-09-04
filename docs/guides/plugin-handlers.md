@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Plugin handlers — registering host-specific Minion handlers
 
 GBrain's Minion worker ships with seven built-in handlers: `sync`,

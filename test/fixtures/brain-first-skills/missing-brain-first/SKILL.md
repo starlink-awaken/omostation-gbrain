@@ -1,8 +1,11 @@
 ---
+type: ssot
 name: missing-brain-first
 description: External-lookup skill with NO brain-first compliance
 triggers:
   - "research thing"
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # missing-brain-first

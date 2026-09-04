@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Minions shell jobs — move deterministic crons off the gateway
 
 ## 30 seconds

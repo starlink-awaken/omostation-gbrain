@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 <!--
 Tier 5.5 Externally-Authored Query Submission template
 See eval/CONTRIBUTING.md for the full workflow.

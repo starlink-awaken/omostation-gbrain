@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Skillpacks as scaffolding, not amber
 
 GBrain v0.33 reshapes `gbrain skillpack` from a package manager into a

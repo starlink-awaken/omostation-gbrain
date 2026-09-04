@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Brains and Sources — the mental model
 
 GBrain has two orthogonal axes for organizing knowledge. Users and agents both

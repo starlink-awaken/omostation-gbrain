@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: migrate
 description: Universal migration from Obsidian, Notion, Logseq, markdown, CSV, JSON, Roam
 triggers:
@@ -12,6 +13,8 @@ tools:
   - add_tag
   - sync_brain
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Migrate Skill

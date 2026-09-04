@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain Knowledge Runtime — Design Doc
 
 **Status:** DRAFT for CEO review.

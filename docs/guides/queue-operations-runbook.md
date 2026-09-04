@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Queue operations runbook
 
 "My queue looks wedged — what do I run?" The commands below are in the order

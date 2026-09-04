@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Connect GBrain to Claude Desktop
 
 **Important:** Claude Desktop does NOT connect to remote MCP servers via

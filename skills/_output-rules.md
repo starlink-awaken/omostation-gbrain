@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Output Rules
 
 Cross-cutting output quality standards for all brain-writing skills.

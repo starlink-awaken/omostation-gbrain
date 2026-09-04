@@ -1,9 +1,12 @@
 ---
+type: ssot
 name: compliant-phase
 description: External-lookup skill with explicit Phase 1 brain heading
 triggers:
   - "enrich entity"
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # compliant-phase

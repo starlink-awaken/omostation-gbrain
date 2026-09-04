@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Minions fix — repairing a half-migrated install
 
 **tl;dr:** on v0.11.1+ everything should self-heal. If Minions is partially

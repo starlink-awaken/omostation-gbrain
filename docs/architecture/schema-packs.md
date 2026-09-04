@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Schema Packs
 
 A schema pack tells gbrain what shape your brain takes — which directories

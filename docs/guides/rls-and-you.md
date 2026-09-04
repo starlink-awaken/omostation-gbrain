@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # RLS and you
 
 Short version: every table in your gbrain's `public` schema needs Row Level

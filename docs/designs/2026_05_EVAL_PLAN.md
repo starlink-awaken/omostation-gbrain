@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Embedder Shootout — May 2026 Eval Plan
 
 **Status:** approved, ready to execute

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain v0: Postgres-Native Personal Knowledge Brain
 
 > **Historical design doc.** This is the original v0 spec from before PGLite landed. Several

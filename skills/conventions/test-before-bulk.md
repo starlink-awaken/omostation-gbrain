@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Test Before Bulk Convention
 
 Never run a batch operation without testing one first.

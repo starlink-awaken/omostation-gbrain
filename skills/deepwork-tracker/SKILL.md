@@ -1,10 +1,13 @@
 ---
+type: ssot
 name: deepwork-tracker
 description: Track deep work sessions.
 triggers:
   - "deep work"
   - "focus session"
   - "pomodoro"
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Deep Work Tracker

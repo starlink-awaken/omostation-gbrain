@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Subagent Routing Convention
 
 How your agent decides between native subagents and GBrain Minions for

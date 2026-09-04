@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain Installation Verification Runbook
 
 Run these checks after install to confirm every part of GBrain is working.

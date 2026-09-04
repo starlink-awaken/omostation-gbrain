@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: cron-scheduler
 version: 1.0.0
 description: |
@@ -14,6 +15,8 @@ tools:
   - get_page
   - put_page
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Cron Scheduler

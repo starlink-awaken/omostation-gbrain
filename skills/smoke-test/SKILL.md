@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: smoke-test
 description: |
   Post-restart smoke tests + auto-fix for gbrain and OpenClaw environments.
@@ -15,6 +16,8 @@ tools:
   - exec
   - read
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Smoke Test Skillpack

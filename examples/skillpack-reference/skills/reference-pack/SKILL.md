@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: reference-pack
 description: Reference skill demonstrating the 10/10 skillpack contract. Adds a "what does this skillpack do" answer to the user's agent.
 mutating: false
@@ -8,6 +9,8 @@ triggers:
   - explain the skillpack contract
   - what's a 10/10 skillpack
   - how do third-party skillpacks work
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # reference-pack

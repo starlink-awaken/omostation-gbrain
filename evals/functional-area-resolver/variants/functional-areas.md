@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 <!-- A/B EVAL FIXTURE — synthetic resolver shape, do not invoke from agent context. -->
 <!-- Variant: FUNCTIONAL-AREAS — the dispatcher pattern, extracted from a production AGENTS.md at the post-compression state; owner PII scrubbed. ~13KB. -->
 

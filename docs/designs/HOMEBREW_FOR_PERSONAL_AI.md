@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Homebrew for Personal AI Infrastructure
 
 The 10-star vision for GBrain's integration system. Ship Approach B (v0.7.0),

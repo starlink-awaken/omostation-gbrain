@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Salience + Recency on `gbrain query` (v0.29.1)
 
 YOU ARE IN CHARGE of the `salience` and `recency` parameters on gbrain's

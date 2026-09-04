@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # System of record
 
 **The GitHub repo (markdown + frontmatter) is the system of record.

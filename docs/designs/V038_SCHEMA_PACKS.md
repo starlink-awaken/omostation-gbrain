@@ -1,5 +1,8 @@
 ---
+type: ssot
 status: ACTIVE
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 # CEO Plan: v0.38 Schema Packs — Bring Your Own Shape
 

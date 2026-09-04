@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: soul-audit
 version: 1.0.0
 description: |
@@ -14,6 +15,8 @@ triggers:
 tools:
   - put_page
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Soul Audit — Agent Identity Builder

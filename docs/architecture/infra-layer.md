@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain Infrastructure Layer
 
 The shared foundation that all skills, recipes, and integrations build on.

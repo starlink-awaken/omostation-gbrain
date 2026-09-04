@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Brain-First Lookup Convention
 
 **Read this before doing ANY entity/person/company/fact lookup.**

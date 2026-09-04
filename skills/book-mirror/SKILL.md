@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: book-mirror
 version: 0.1.0
 description: Take any book (EPUB/PDF), produce a personalized chapter-by-chapter analysis with two-column tables. Left column preserves the chapter content; right column maps every idea to the reader's actual life using brain context. Output is a single brain page at media/books/<slug>-personalized.md plus an optional PDF via brain-pdf.
@@ -12,6 +13,8 @@ mutating: true
 writes_pages: true
 writes_to:
   - media/books/
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # book-mirror — Personalized Chapter-by-Chapter Book Analysis

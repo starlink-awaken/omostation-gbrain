@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Pre-commit hook for brain repos (v0.22.4+)
 
 `gbrain frontmatter install-hook` installs a git pre-commit hook in your

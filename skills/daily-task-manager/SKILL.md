@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: daily-task-manager
 version: 1.0.0
 description: |
@@ -16,6 +17,8 @@ tools:
   - put_page
   - add_timeline_entry
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Daily Task Manager

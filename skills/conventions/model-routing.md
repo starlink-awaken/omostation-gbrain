@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Model Routing Convention
 
 Two distinct concerns share this name. Read both — they apply at different

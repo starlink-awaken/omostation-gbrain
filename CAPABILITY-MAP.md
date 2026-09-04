@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain 能力地图
 
 > Postgres 知识数据库 · 混合 RAG 搜索

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Connect GBrain to ChatGPT
 
 **Status (v0.26.0):** Unblocked. GBrain's `gbrain serve --http` ships OAuth 2.1

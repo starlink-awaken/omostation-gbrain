@@ -1,10 +1,13 @@
 ---
+type: ssot
 name: moltbook
 description: Knowledge molting — brain page lifecycle.
 triggers:
   - "moltbook"
   - "knowledge molt"
   - "molt my knowledge"
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Moltbook

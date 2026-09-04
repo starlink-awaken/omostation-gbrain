@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Search Mode Evaluation Methodology
 
 _How v0.32.3 measures the difference between `conservative`, `balanced`, and `tokenmax`. Written haters-immune: every claim is reproducible from the committed dataset + raw outputs._

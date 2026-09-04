@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Origin story
 
 GBrain came out of building OpenClaw — Garry's personal AI agent fork. The first version had skills and a brain, but the brain was a flat directory of markdown files. Search was ripgrep. Memory was vibes.

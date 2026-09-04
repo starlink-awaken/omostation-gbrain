@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Bootstrap
 
 Post-scaffold steps. gbrain displays this but does NOT auto-execute.

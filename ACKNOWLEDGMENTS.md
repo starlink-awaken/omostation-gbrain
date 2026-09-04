@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Acknowledgments
 
 We thank everyone who has contributed to `gbrain` through issues, pull requests, documentation, feedback, and testing.

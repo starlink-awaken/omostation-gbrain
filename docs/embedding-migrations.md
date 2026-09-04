@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Switching embedding models or dimensions on an existing brain
 
 GBrain stores embeddings in a fixed-dimension `vector(N)` column on

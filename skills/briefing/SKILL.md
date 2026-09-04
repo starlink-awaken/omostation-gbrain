@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: briefing
 description: Compile daily briefing with meeting context, active deals, and citation tracking
 triggers:
@@ -12,6 +13,8 @@ tools:
   - list_pages
   - get_timeline
 mutating: false
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Briefing Skill

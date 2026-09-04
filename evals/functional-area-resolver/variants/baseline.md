@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 <!-- A/B EVAL FIXTURE — synthetic resolver shape, do not invoke from agent context. -->
 <!-- Variant: BASELINE — 270-row bullet-list shape. Extracted from a production AGENTS.md at the pre-compression state; owner PII scrubbed. ~25KB. -->
 

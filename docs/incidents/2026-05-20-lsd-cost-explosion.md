@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Incident Report: LSD Brainstorm 53× Cost Overrun
 
 **Date:** 2026-05-20

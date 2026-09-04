@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: setup
 description: Set up GBrain with auto-provision Supabase or PGLite, AGENTS.md injection, first import
 triggers:
@@ -11,6 +12,8 @@ tools:
   - sync_brain
   - put_page
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Setup GBrain

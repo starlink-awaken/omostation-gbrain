@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Claw-test brief — upgrade-from-v0.18
 
 You inherit a gbrain v0.18 brain (the harness has already replayed a seed SQL dump into a PGLite database). Walk through the upgrade path:

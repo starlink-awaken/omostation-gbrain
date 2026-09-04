@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: perplexity-research
 version: 0.1.0
 description: Brain-augmented web research. Sends brain context about a topic to Perplexity, which searches the web with citations and returns what is NEW vs what the brain already knows. Use for entity enrichment, current-state checks, deal monitoring, and freshness deltas. NOT for simple URL fetches (use web_fetch) or brain-only queries (use gbrain query).
@@ -14,6 +15,8 @@ mutating: true
 writes_pages: true
 writes_to:
   - research/
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # perplexity-research — Brain-Augmented Web Research

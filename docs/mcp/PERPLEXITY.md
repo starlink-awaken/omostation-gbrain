@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Connect GBrain to Perplexity Computer
 
 Perplexity Computer supports remote MCP servers with bearer token authentication.

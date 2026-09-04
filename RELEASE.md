@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Release Process
 
 This document describes how to cut a new release for `gbrain`.

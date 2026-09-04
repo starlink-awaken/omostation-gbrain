@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # ZeroEntropy — zembed-1 + zerank-2
 
 [ZeroEntropy](https://zeroentropy.dev) ships two specialized small models

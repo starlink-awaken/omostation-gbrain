@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: brain-taxonomist
 version: 1.0.0
 prompt_version: 1
@@ -17,6 +18,8 @@ triggers:
   - "which directory does this go"
   - "which directory does this page go"
 mutating: false
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # brain-taxonomist

@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # `gbrain eval takes-quality` — reproducible cross-modal quality eval
 
 v0.32+ ships a CI-able quality gate for the takes layer. Three frontier models

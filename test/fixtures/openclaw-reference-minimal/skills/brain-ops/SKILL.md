@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: brain-ops
 description: Core read/write cycle for the OpenClaw reference fixture.
 triggers:
@@ -7,6 +8,8 @@ writes_pages: true
 writes_to:
   - people/
   - companies/
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # brain-ops

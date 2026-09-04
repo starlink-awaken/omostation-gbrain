@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # How a downstream agent should talk to gbrain
 
 This guide is for authors of downstream agents (hermes, openclaw, future

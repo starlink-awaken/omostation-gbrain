@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: skill-creator
 version: 1.0.0
 description: |
@@ -13,6 +14,8 @@ tools:
   - search
   - list_pages
 mutating: true
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Skill Creator

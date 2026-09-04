@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: repo-architecture
 version: 1.0.0
 description: |
@@ -14,6 +15,8 @@ tools:
   - get_page
   - list_pages
 mutating: false
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Repo Architecture — Filing Rules

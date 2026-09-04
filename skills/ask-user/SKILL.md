@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: ask-user
 version: 1.0.0
 description: |
@@ -12,6 +13,8 @@ triggers:
   - "choice gate"
   - "user decision"
 priority: 50
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Ask User — Choice Gate Pattern

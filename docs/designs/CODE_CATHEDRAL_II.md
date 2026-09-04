@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Code Cathedral II — v0.20.0 Design
 
 **Status:** Accepted. CEO + Eng + 2 codex passes CLEARED (2026-04-24). 16 cross-model findings absorbed total: 7 codex pass 1 (structural prereqs) + 6 codex pass 2 (absorption errors including the CHUNKER_VERSION silent-no-op gate and inbound-edge invalidation) + 3 eng-review architectural decisions. DX review recommended post-Layer 8 (new CLI surfaces) before ship.

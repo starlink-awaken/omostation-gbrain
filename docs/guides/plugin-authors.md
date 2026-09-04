@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Plugin authors guide (v0.15)
 
 `gbrain` discovers subagent definitions from outside this repo via

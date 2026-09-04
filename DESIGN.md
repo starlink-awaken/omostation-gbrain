@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # DESIGN.md
 
 The design system source of truth for gbrain. Born from the de facto tokens

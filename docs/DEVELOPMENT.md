@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Development Guide
 
 Thank you for contributing to this project. This guide covers how to set up a local development environment, run tests, and submit changes.

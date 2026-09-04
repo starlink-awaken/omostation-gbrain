@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: daily-task-prep
 version: 1.0.0
 description: |
@@ -16,6 +17,8 @@ tools:
   - list_pages
   - get_timeline
 mutating: false
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Daily Task Prep

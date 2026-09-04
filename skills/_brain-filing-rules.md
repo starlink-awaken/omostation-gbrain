@@ -1,3 +1,9 @@
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Brain Filing Rules -- MANDATORY for all skills that write to the brain
 
 ## The Rule

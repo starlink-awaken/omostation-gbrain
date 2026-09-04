@@ -1,4 +1,5 @@
 ---
+type: ssot
 name: publish
 description: Share brain pages as beautiful password-protected HTML with zero LLM calls
 triggers:
@@ -9,6 +10,8 @@ tools:
   - get_page
   - search
 mutating: false
+owner: governance-team
+last-reviewed: 2026-09-04
 ---
 
 # Publish Skill
