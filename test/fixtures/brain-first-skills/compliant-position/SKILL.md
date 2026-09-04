@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: compliant-position
 description: Skill that runs gbrain search before external lookup
 triggers:

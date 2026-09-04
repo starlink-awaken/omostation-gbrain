@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: moltbook
 description: Knowledge molting — brain page lifecycle.
 triggers:

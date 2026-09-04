@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: query
 description: Look up brain pages in the OpenClaw reference fixture.
 triggers:

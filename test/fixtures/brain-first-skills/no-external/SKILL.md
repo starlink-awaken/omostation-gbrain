@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: no-external
 description: Skill that operates purely on local state
 triggers:

@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: missing-brain-first
 description: External-lookup skill with NO brain-first compliance
 triggers:

@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: setup
 description: Set up GBrain with auto-provision Supabase or PGLite, AGENTS.md injection, first import
 triggers:

@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: multi-pattern
 description: Skill that uses multiple external tools without compliance
 triggers:

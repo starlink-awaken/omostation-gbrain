@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: typo-frontmatter
 description: Skill with typo in brain_first declaration
 triggers:

@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: Bug Report
 about: Something isn't working
 labels: bug

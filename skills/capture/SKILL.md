@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: capture
 description: Save any thought or content into the brain via one CLI command. The single human-facing entrypoint that replaces "put_page vs commit-then-sync vs autopilot-wait" with one command that just works.
 triggers:

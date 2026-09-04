@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: brain-taxonomist
 version: 1.0.0
 prompt_version: 1

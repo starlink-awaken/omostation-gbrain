@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: publish
 description: Share brain pages as beautiful password-protected HTML with zero LLM calls
 triggers:

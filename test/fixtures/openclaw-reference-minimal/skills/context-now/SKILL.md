@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: context-now
 description: "ALWAYS-ON time-sensitivity discipline for the OpenClaw reference fixture."
 triggers:

@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: negation-prose
 description: Skill where brain reference precedes a negation-prose mention
 triggers:

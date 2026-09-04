@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: deepwork-tracker
 description: Track deep work sessions.
 triggers:

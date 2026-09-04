@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: migrate
 description: Universal migration from Obsidian, Notion, Logseq, markdown, CSV, JSON, Roam
 triggers:

@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: cron-scheduler
 version: 1.0.0
 description: |

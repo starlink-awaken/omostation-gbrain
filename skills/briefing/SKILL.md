@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: briefing
 description: Compile daily briefing with meeting context, active deals, and citation tracking
 triggers:

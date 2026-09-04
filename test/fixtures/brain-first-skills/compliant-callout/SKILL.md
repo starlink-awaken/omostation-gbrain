@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: compliant-callout
 description: External-lookup skill with canonical Convention callout
 triggers:

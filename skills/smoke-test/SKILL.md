@@ -1,5 +1,6 @@
 ---
 type: ssot
+last_updated: 2026-09-04
 name: smoke-test
 description: |
   Post-restart smoke tests + auto-fix for gbrain and OpenClaw environments.
