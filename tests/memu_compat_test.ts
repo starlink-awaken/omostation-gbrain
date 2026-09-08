@@ -3,7 +3,7 @@
  * 
  * Status: ✅ memU Engine IMPLEMENTED and TESTED
  * 
- * Run: bun --cwd projects/gbrain tests/memu_engine_all.test.ts
+ * Run: bun --cwd projects/knowledge/gbrain tests/memu_engine_all.test.ts
  * Result: 27/27 ALL PASS
  * Engine: src/core/memu-engine.ts (866 lines, Bun.sqlite backend)
  * 
