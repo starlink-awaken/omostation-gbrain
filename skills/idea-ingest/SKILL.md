@@ -25,6 +25,7 @@ writes_to:
   - people/
   - concepts/
   - sources/
+last-reviewed: 2026-09-18
 ---
 
 # Idea Ingest Skill

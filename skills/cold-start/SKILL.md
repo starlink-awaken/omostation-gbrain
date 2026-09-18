@@ -36,6 +36,7 @@ writes_to:
   - media/
   - conversations/
   - sources/
+last-reviewed: 2026-09-18
 ---
 
 # Cold Start — Day-One Brain Bootstrapping

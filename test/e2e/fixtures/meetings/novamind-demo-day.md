@@ -4,6 +4,7 @@ title: NovaMind — YC W25 Demo Day
 tags:
   - demo-day
   - yc-w25
+last-reviewed: 2026-09-18
 ---
 
 # NovaMind — YC W25 Demo Day

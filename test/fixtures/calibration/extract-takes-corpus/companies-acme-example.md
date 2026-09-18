@@ -2,6 +2,7 @@
 title: acme-example
 type: companies
 slug: companies/acme-example
+last-reviewed: 2026-09-18
 ---
 
 # acme-example

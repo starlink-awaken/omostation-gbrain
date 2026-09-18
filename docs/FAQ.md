@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # gbrain FAQ
@@ -22,9 +23,9 @@ Read [`../CONTRIBUTING.md`](../CONTRIBUTING.md) and [`../CODE_OF_CONDUCT.md`](..
 
 They are intentionally not maintained in project Markdown. Use the workspace registries:
 
-- [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml)
+- [`../../../../docs/project-registry.yaml`](../../../../docs/project-registry.yaml)
 - [`../../protocols/port-registry.yaml`](../../protocols/port-registry.yaml)
-- [`.omo/state/system.yaml`](../../.omo/state/system.yaml) (via `omo state sync`)
+- [`.omo/state/system.yaml`](../../../../.omo/state/system.yaml) (via `omo state sync`)
 
 ## How do I report a bug or security issue?
 

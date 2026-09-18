@@ -5,6 +5,7 @@ tweet_count: 8
 created: 2026-04-01
 updated: 2026-04-22
 tags: [concept, calibration-fixture, holdout]
+last-reviewed: 2026-09-18
 ---
 
 # Founder Execution

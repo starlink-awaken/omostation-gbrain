@@ -20,6 +20,7 @@ writes_to:
   - people/
   - companies/
   - concepts/
+last-reviewed: 2026-09-18
 ---
 
 # Signal Detector — Ambient Brain Capture

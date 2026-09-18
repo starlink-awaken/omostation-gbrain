@@ -18,6 +18,7 @@ tools:
   - put_page
   - list_pages
 mutating: true
+last-reviewed: 2026-09-18
 ---
 
 # Citation Fixer Skill

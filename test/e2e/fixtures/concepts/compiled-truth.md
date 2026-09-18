@@ -4,6 +4,7 @@ title: Compiled Truth
 tags:
   - architecture
   - brain-design
+last-reviewed: 2026-09-18
 ---
 
 # Compiled Truth

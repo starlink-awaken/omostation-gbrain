@@ -1,6 +1,7 @@
 ---
 type: person
 name: Alice Example
+last-reviewed: 2026-09-18
 ---
 
 # Alice Example
