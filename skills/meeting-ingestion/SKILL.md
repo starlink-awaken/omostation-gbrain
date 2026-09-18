@@ -23,6 +23,7 @@ writes_to:
   - meetings/
   - people/
   - companies/
+last-reviewed: 2026-09-18
 ---
 
 # Meeting Ingestion Skill

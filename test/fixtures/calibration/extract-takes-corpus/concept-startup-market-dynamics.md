@@ -5,6 +5,7 @@ tweet_count: 12
 created: 2026-04-01
 updated: 2026-04-24
 tags: [concept, calibration-fixture]
+last-reviewed: 2026-09-18
 ---
 
 # Startup Market Dynamics

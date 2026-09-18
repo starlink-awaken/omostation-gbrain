@@ -2,6 +2,7 @@
 title: Cities and ambition
 type: writing
 date: 2024-02-15
+last-reviewed: 2026-09-18
 ---
 
 # Cities and ambition

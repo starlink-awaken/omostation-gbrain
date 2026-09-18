@@ -2,6 +2,7 @@
 title: 2025 Q3 portfolio decisions
 type: decisions
 date: 2025-09-30
+last-reviewed: 2026-09-18
 ---
 
 # Q3 2025 portfolio decisions

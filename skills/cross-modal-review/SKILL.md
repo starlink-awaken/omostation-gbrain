@@ -19,6 +19,7 @@ tools:
   - query
   - get_page
 mutating: false
+last-reviewed: 2026-09-18
 ---
 
 # Cross-Modal Review

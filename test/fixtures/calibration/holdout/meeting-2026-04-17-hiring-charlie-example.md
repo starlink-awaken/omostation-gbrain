@@ -4,6 +4,7 @@ type: meeting
 slug: meetings/2026-04-17-hiring-charlie-example
 date: 2026-04-17
 attendees: [you, alice-example, charlie-example]
+last-reviewed: 2026-09-18
 ---
 
 # Hiring OH — charlie-example for COO at acme-example

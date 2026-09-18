@@ -30,6 +30,7 @@ health_checks:
         label: "Google OAuth"
 setup_time: 15 min
 cost_estimate: "$0 (both options are free)"
+last-reviewed: 2026-09-18
 ---
 
 # Credential Gateway: Secure Access to Google Services

@@ -2,6 +2,7 @@
 type: person
 name: Alice Example
 x_handle: alice_example
+last-reviewed: 2026-09-18
 ---
 
 # Alice Example

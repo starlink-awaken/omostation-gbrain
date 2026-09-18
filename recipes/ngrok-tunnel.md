@@ -18,6 +18,7 @@ health_checks:
     label: "ngrok API"
 setup_time: 10 min
 cost_estimate: "$8/mo for Hobby tier (fixed domain). Free tier works but URLs change on restart."
+last-reviewed: 2026-09-18
 ---
 
 # Public Tunnel: Fixed URL for Your Brain

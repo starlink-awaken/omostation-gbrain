@@ -27,6 +27,7 @@ tools:
   - traverse_graph
   - get_timeline
 mutating: false
+last-reviewed: 2026-09-18
 ---
 
 # Query Skill
