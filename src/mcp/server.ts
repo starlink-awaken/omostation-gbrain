@@ -2,13 +2,24 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import type { BrainEngine } from '../core/engine.ts';
+import type { EngineConfig } from '../core/types.ts';
 import { operations } from '../core/operations.ts';
 import { VERSION } from '../version.ts';
 import { buildToolDefs } from './tool-defs.ts';
 import { dispatchToolCall, validateParams, buildOperationContext } from './dispatch.ts';
 import { getBrainHotMemoryMeta } from '../core/facts/meta-hook.ts';
 
-export async function startMcpServer(engine: BrainEngine) {
+export interface McpServerOptions {
+  /**
+   * Connect the engine around each tools/call instead of holding the PGLite
+   * write lock for the server's whole lifetime. Long-lived lock ownership
+   * makes concurrent CLI consumers (gbrain CLI, MOS live recall backend)
+   * time out at 30s for as long as an MCP client session stays open.
+   */
+  lazyConnect?: EngineConfig;
+}
+
+export async function startMcpServer(engine: BrainEngine, opts?: McpServerOptions) {
   const server = new Server(
     { name: 'gbrain', version: VERSION },
     { capabilities: { tools: {} } },
@@ -33,18 +44,38 @@ export async function startMcpServer(engine: BrainEngine) {
     // see private hunches via takes_list / takes_search / query. Operators
     // who want stdio to see everything should call ops directly via
     // `gbrain call <op>` (sets remote=false in src/cli.ts).
-    return dispatchToolCall(engine, name, params, {
-      remote: true,
-      takesHoldersAllowList: ['world'],
-      // v0.31: source defaults to 'default' for stdio (no per-token scope).
-      // Operators who want a different source on stdio MCP should set
-      // GBRAIN_SOURCE in the env or use --source via `gbrain call`.
-      sourceId: process.env.GBRAIN_SOURCE || 'default',
-      // v0.31 (eD3): _meta.brain_hot_memory injection so Claude Desktop /
-      // Code see the brain's relevant hot memory automatically alongside
-      // every tool-call response. Best-effort; absorbs errors.
-      metaHook: getBrainHotMemoryMeta,
-    });
+    if (opts?.lazyConnect) await engine.connect(opts.lazyConnect);
+    try {
+      return await dispatchToolCall(engine, name, params, {
+        remote: true,
+        takesHoldersAllowList: ['world'],
+        // v0.31: source defaults to 'default' for stdio (no per-token scope).
+        // Operators who want a different source on stdio MCP should set
+        // GBRAIN_SOURCE in the env or use --source via `gbrain call`.
+        sourceId: process.env.GBRAIN_SOURCE || 'default',
+        // v0.31 (eD3): _meta.brain_hot_memory injection so Claude Desktop /
+        // Code see the brain's relevant hot memory automatically alongside
+        // every tool-call response. Best-effort; absorbs errors.
+        metaHook: getBrainHotMemoryMeta,
+      });
+    } finally {
+      // Always release the PGLite write lock — even on handler errors —
+      // so CLI/MOS consumers are never blocked by a failed call.
+      // Drain fire-and-forget write-backs first: disconnecting while a
+      // last_retrieved_at / search-cache write is in flight deadlocks the
+      // single-writer PGLite engine (same bug as the CLI exit deadlock).
+      if (opts?.lazyConnect) {
+        try {
+          const { awaitPendingRetrievalBumps } = await import('../core/last-retrieved.ts');
+          await awaitPendingRetrievalBumps();
+        } catch { /* best-effort */ }
+        try {
+          const { awaitPendingSearchCacheWrites } = await import('../core/search/hybrid.ts');
+          await awaitPendingSearchCacheWrites();
+        } catch { /* best-effort */ }
+        await engine.disconnect().catch(() => {});
+      }
+    }
   });
 
   const transport = new StdioServerTransport();

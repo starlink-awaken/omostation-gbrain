@@ -63,7 +63,11 @@ export async function acquireLock(dataDir: string | undefined, opts?: { timeoutM
   // can't derive that across helper boundaries.
   mkdirSync(dataDir as string, { recursive: true });
 
-  const timeoutMs = opts?.timeoutMs ?? 30_000; // 30 second default timeout
+  // GBRAIN_LOCK_TIMEOUT_MS lets short-lived background consumers (MOS live
+  // gbrain recall backend) fail fast instead of stalling the full 30s when
+  // another process briefly holds the writer lock.
+  const envTimeout = Number(process.env.GBRAIN_LOCK_TIMEOUT_MS || '');
+  const timeoutMs = opts?.timeoutMs ?? (Number.isFinite(envTimeout) && envTimeout > 0 ? envTimeout : 30_000);
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeoutMs) {

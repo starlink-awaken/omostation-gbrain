@@ -1,9 +1,3 @@
----
-type: ssot
-owner: governance-team
-last_updated: 2026-09-03
----
-
 # Evaluation Metric Glossary
 
 **Auto-generated from `src/core/eval/metric-glossary.ts`. Do not edit by hand.** Run `bun run scripts/generate-metric-glossary.ts` to regenerate.
