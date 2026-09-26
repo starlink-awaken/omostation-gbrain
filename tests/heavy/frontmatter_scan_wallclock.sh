@@ -45,7 +45,7 @@ LOG_DIR="$GBRAIN_HOME/audit"
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/heavy-frontmatter_scan_wallclock-$TS.log"
 SURFACE_LOG="${TMPDIR:-/tmp}/heavy-frontmatter_scan_wallclock-$TS.log"
-trap 'cp -f "$LOG" "$SURFACE_LOG" 2>/dev/null || true; rm -rf "$TMP_GBRAIN_HOME" "$BRAIN_DIR"' EXIT
+trap 'cp -f "$LOG" "$SURFACE_LOG" 2>/dev/null || true; cp -f "$LOG.doctor" "$SURFACE_LOG.doctor" 2>/dev/null || true; rm -rf "$TMP_GBRAIN_HOME" "$BRAIN_DIR"' EXIT
 
 echo "[fm_wallclock] log=$LOG"
 echo "[fm_wallclock] brain=$BRAIN_DIR (real_pages=$REAL_PAGES node_modules_pages=$NODE_MODULES_PAGES)"
@@ -92,21 +92,36 @@ timeout 120s bun run src/cli.ts init --pglite --yes --no-embedding >> "$LOG" 2>&
 
 # Register the brain dir as a source. Use raw SQL since `gbrain sources add`
 # might not exist in this version-window; the schema is what doctor reads.
+#
+# Connect to the SAME store doctor will read: DATABASE_URL → Postgres (CI
+# exports it), otherwise the PGLite brain init just created under
+# $GBRAIN_HOME/.gbrain/brain.pglite. The previous code always used an
+# in-memory `connect({})`, so the INSERT evaporated on disconnect and
+# doctor scanned zero sources — the frontmatter assertion was vacuous.
 echo "[fm_wallclock] register source..." | tee -a "$LOG"
 # NOTE: use `bun -e` (not `bun run -e`): `bun run` does not accept an
 # inline `-e` eval argument and prints usage / exits non-zero, which broke
 # this heavy test on every CI run (bun 1.3.x + latest).
-bun -e "
-import { PGLiteEngine } from './src/core/pglite-engine.ts';
-const e = new PGLiteEngine();
-await e.connect({});
-await e.initSchema();
-await e.executeRaw(
-  \"INSERT INTO sources (id, name, local_path) VALUES ('fm-wallclock', 'Frontmatter wallclock test', \\\$1)\",
-  ['$BRAIN_DIR'],
+FM_BRAIN_DIR="$BRAIN_DIR" bun -e "
+const dbUrl = process.env.DATABASE_URL;
+const brainDir = process.env.FM_BRAIN_DIR;
+let engine;
+if (dbUrl) {
+  const { PostgresEngine } = await import('./src/core/postgres-engine.ts');
+  engine = new PostgresEngine();
+  await engine.connect({ engine: 'postgres', database_url: dbUrl });
+} else {
+  const { PGLiteEngine } = await import('./src/core/pglite-engine.ts');
+  engine = new PGLiteEngine();
+  await engine.connect({ engine: 'pglite', database_path: process.env.GBRAIN_HOME + '/.gbrain/brain.pglite' });
+}
+await engine.initSchema();
+await engine.executeRaw(
+  \"INSERT INTO sources (id, name, local_path) VALUES ('fm-wallclock', 'Frontmatter wallclock test', \$1) ON CONFLICT (id) DO UPDATE SET local_path = EXCLUDED.local_path\",
+  [brainDir],
 );
-await e.disconnect();
-console.log('source registered');
+await engine.disconnect();
+console.log('source registered (engine=' + (dbUrl ? 'postgres' : 'pglite') + ')');
 " 2>&1 | tee -a "$LOG"
 
 # Step 3: run gbrain doctor; capture wall-clock + exit + frontmatter_integrity status.
@@ -137,8 +152,20 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
 
-FM_STATUS=$(jq -r '.checks[] | select(.name=="frontmatter_integrity") | .status' "$LOG.doctor")
-FM_MSG=$(jq -r '.checks[] | select(.name=="frontmatter_integrity") | .message' "$LOG.doctor")
+# doctor --json intermittently emits stray non-JSON stdout lines around the
+# report (observed in CI + local PG runs: `jq: parse error: Invalid numeric
+# literal at line 2, column 17` — jq exits 5 and `set -e` failed the whole
+# script AFTER doctor exit=0). Extract the first `{...` line (the report is
+# minified single-line) instead of feeding the raw file to jq.
+FM_JSON_LINE=$(grep -m1 -E '^\{.*"schema_version"' "$LOG.doctor" || true)
+if [ -z "$FM_JSON_LINE" ]; then
+  echo "[fm_wallclock] FAIL: no JSON object line in doctor output" >&2
+  echo "  First 5 lines of $LOG.doctor:" >&2
+  head -5 "$LOG.doctor" >&2 || true
+  exit 1
+fi
+FM_STATUS=$(printf '%s\n' "$FM_JSON_LINE" | jq -r '.checks[] | select(.name=="frontmatter_integrity") | .status')
+FM_MSG=$(printf '%s\n' "$FM_JSON_LINE" | jq -r '.checks[] | select(.name=="frontmatter_integrity") | .message')
 echo "[fm_wallclock] frontmatter_integrity: status=$FM_STATUS msg=$FM_MSG" | tee -a "$LOG"
 
 if [ "$FM_STATUS" != "ok" ]; then
