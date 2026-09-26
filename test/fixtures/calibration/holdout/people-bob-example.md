@@ -2,6 +2,7 @@
 title: bob-example
 type: people
 slug: people/bob-example
+last-reviewed: 2026-09-18
 ---
 
 # Bob Example

@@ -62,6 +62,7 @@ distinct_from:
     reason: "ingest handles NEW content from external URLs/media. EIIRP handles COMPLETED research that needs to be decomposed and filed across multiple brain locations."
   - name: skillify
     reason: "skillify is the meta-skill for turning a feature into a tested skill. EIIRP calls skillify when Phase 5 identifies a reusable pattern."
+last-reviewed: 2026-09-18
 ---
 
 # EIIRP — Everything In Its Right Place

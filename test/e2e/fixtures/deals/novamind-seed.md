@@ -4,6 +4,7 @@ title: NovaMind Seed Round
 tags:
   - seed
   - ai-agents
+last-reviewed: 2026-09-18
 ---
 
 # NovaMind Seed Round

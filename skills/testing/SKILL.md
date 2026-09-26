@@ -20,6 +20,7 @@ tools:
   - search
   - list_pages
 mutating: false
+last-reviewed: 2026-09-18
 ---
 
 # Testing Skill — Validation + Daily Health & Regression Intelligence

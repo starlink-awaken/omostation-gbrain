@@ -17,6 +17,7 @@ health_checks:
     label: "X API"
 setup_time: 15 min
 cost_estimate: "$0-200/mo (Free tier: 1 app, read-only. Basic: $200/mo for search + higher limits)"
+last-reviewed: 2026-09-18
 ---
 
 # X-to-Brain: Twitter Monitoring That Updates Your Brain

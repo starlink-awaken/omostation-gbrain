@@ -2,6 +2,7 @@
 title: alice-example
 type: people
 slug: people/alice-example
+last-reviewed: 2026-09-18
 ---
 
 # Alice Example

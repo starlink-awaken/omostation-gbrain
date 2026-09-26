@@ -4,6 +4,7 @@ name: Acme Example
 founded: 2024
 founders:
   - alice-example
+last-reviewed: 2026-09-18
 ---
 
 # Acme Example

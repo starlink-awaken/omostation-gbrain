@@ -2,11 +2,12 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # gbrain Architecture
 
-> Architecture overview for **gbrain**. For the full workspace architecture, see [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md).
+> Architecture overview for **gbrain**. For the full workspace architecture, see [`../../../../ARCHITECTURE.md`](../../../../ARCHITECTURE.md).
 
 ## Responsibilities
 

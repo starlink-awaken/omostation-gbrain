@@ -19,6 +19,7 @@ writes_to:
 # uploaded source text + writes brain pages; it doesn't call external
 # APIs. Declarative opt-out.
 brain_first: exempt
+last-reviewed: 2026-09-18
 ---
 
 # strategic-reading — Applied Analysis from Source Texts

@@ -4,6 +4,7 @@ title: Marcus Reid
 tags:
   - investor
   - ai-focus
+last-reviewed: 2026-09-18
 ---
 
 # Marcus Reid

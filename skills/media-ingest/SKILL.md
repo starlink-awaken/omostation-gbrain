@@ -31,6 +31,7 @@ writes_to:
   - people/
   - companies/
   - sources/
+last-reviewed: 2026-09-18
 ---
 
 # Media Ingest Skill

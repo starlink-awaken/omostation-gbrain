@@ -3,6 +3,7 @@ type: derived
 source: projects/knowledge
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # gbrain Documentation
@@ -38,9 +39,9 @@ This directory collects project-level documentation for **gbrain**.
 
 ## Workspace Context
 
-- Workspace architecture: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
-- Project metadata SSOT: [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml)
-- Layer placement: [`../../LAYER-INDEX.md`](../../LAYER-INDEX.md)
+- Workspace architecture: [`../../../../ARCHITECTURE.md`](../../../../ARCHITECTURE.md)
+- Project metadata SSOT: [`../../../../docs/project-registry.yaml`](../../../../docs/project-registry.yaml)
+- Layer placement: [`../../../../LAYER-INDEX.md`](../../../../LAYER-INDEX.md)
 
 ## SSOT Rules
 

@@ -19,6 +19,7 @@ writes_to:
   - companies/
   - ideas/
   - personal/
+last-reviewed: 2026-09-18
 ---
 
 # voice-note-ingest — Exact-Phrasing Voice Capture

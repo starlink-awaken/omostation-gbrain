@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # CLAUDE.md — GBrain AI Context
@@ -14,7 +15,7 @@ last_updated: 2026-09-03
     1. [`AGENTS.md`](AGENTS.md)
     2. [`README.md`](README.md) when present
     3. The source files and tests directly related to the task
-    4. Workspace context in [`../../CLAUDE.md`](../../CLAUDE.md) when the task crosses project boundaries
+    4. Workspace context in [`../../../CLAUDE.md`](../../../CLAUDE.md) when the task crosses project boundaries
 
     ## Project Role
 
@@ -45,7 +46,7 @@ bun run ci:local
 
     ```bash
     git status --short
-    uv run --with "pyyaml" python "../../bin/ssot/doc-ssot-lint.py" --json
+    uv run --with "pyyaml" python "../../../bin/ssot/doc-ssot-lint.py" --json
     ```
 
     Report the checks you actually ran and any pre-existing dirty state that remains.

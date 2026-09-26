@@ -5,6 +5,7 @@ tags:
   - search
   - architecture
   - gbrain
+last-reviewed: 2026-09-18
 ---
 
 # Hybrid Search

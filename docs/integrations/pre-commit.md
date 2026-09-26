@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Pre-commit hook for brain repos (v0.22.4+)

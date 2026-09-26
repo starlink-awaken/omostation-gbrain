@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # gbrain eval suspected-contradictions (v0.32.6)

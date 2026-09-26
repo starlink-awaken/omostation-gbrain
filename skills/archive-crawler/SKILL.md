@@ -16,6 +16,7 @@ writes_to:
   - originals/
   - personal/
   - ideas/
+last-reviewed: 2026-09-18
 ---
 
 # archive-crawler — The Universal Archivist
