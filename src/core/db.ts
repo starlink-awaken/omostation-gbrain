@@ -200,6 +200,17 @@ export async function connect(config: EngineConfig): Promise<void> {
         );
       }
     }
+    // NOTICEs (e.g. "extension already exists") default to postgres.js's
+    // console.log — multi-line objects on stdout corrupt JSON consumers
+    // (`doctor --json | jq` intermittently died with "Invalid numeric
+    // literal at line 2, column 17"). Keep the data channel clean: route
+    // notices to stderr, same contract as core/progress.ts.
+    opts.onnotice = (notice: unknown) => {
+      try {
+        const msg = (notice as { message?: string })?.message ?? String(notice);
+        process.stderr.write(`[pg-notice] ${msg}\n`);
+      } catch { /* stderr already closed */ }
+    };
     sql = postgres(url, opts);
 
     // Test connection
