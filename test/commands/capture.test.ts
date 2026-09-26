@@ -15,18 +15,32 @@ import * as os from 'node:os';
 import { PGLiteEngine } from '../../src/core/pglite-engine.ts';
 import { resetPgliteState } from '../helpers/reset-pglite.ts';
 import { runCapture, __testing } from '../../src/commands/capture.ts';
+import { resetGateway, __setEmbedTransportForTests } from '../../src/core/ai/gateway.ts';
 
 let engine: PGLiteEngine;
 let tmpRoot: string;
 let brainDir: string;
 
 beforeAll(async () => {
+  // Shard runs share one bun process: an earlier file may have called
+  // configureGateway(), leaving _config pointing at a real embedding recipe.
+  // In CI (no provider auth / no local ollama) the subsequent put_page embed
+  // threw (`fetch2 is not a function` under bun-latest + ai-sdk) and
+  // runCapture's catch called process.exit(1), killing the whole shard
+  // AFTER the helper tests printed. Reset + stub the embed transport so
+  // this file is hermetic regardless of shard order.
+  resetGateway();
+  __setEmbedTransportForTests((async ({ values }: any) => ({
+    embeddings: values.map(() => new Array(1536).fill(0)),
+    usage: { tokens: 0 },
+  })) as any);
   engine = new PGLiteEngine();
   await engine.connect({});
   await engine.initSchema();
 });
 
 afterAll(async () => {
+  __setEmbedTransportForTests(null);
   await engine.disconnect();
 });
 
