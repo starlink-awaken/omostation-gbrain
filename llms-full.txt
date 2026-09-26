@@ -11,6 +11,12 @@ For the link-only index, see `llms.txt`. Source of truth: https://github.com/gar
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/AGENTS.md
 
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # AGENTS.md — GBrain
 
     > Scope: project-local developer guide for `gbrain`.
@@ -76,6 +82,12 @@ bun run ci:local
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/CLAUDE.md
 
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # CLAUDE.md — GBrain AI Context
 
     > Session loader for AI work inside `gbrain`.
@@ -127,6 +139,12 @@ bun run ci:local
 ## INSTALL_FOR_AGENTS.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/INSTALL_FOR_AGENTS.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # GBrain Installation Guide for AI Agents
 
@@ -411,6 +429,12 @@ columns. PGLite brains no-op. If wiki-style imports were truncated by the old
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/skills/RESOLVER.md
 
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # GBrain Skill Resolver
 
 This is the dispatcher. Skills are the implementation. **Read the skill file before acting.** If two skills could match, read both. They are designed to chain (e.g., ingest then enrich for each entity).
@@ -552,6 +576,13 @@ These apply to ALL brain-writing skills:
 ## README.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/README.md
+
+---
+type: derived
+source: projects/knowledge
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # GBrain
 
@@ -735,11 +766,32 @@ Community PR contributors are credited in `CHANGELOG.md` per release. ZeroEntrop
 
 ---
 
+## 项目状态 (动态数据)
+
+| 指标 | 权威读源 | 说明 |
+|------|----------|------|
+| 版本 | `pyproject.toml` → `[project.version]` | 以 pyproject.toml 为准 |
+| 测试数 | `pytest --collect-only -q` | 动态计数 |
+| 代码行数 | `find src -name "*.py" \| wc -l` | 以实际文件为准 |
+| 源文件数 | `find src -name "*.py" \| wc -l` | 以实际文件为准 |
+| 测试文件数 | `find tests -name "*.py" \| wc -l` | 以实际文件为准 |
+
+> **doc-ssot 契约**: 上表中的所有数字均为易变事实, 不在本文件硬编码. 运行权威读源命令获取实时值.
+> 模板: `.omo/standards/readme-template.md` | 检测: `bin/gac/check-readme-hardcoded.py`
+
+---
+
 # Configuration
 
 ## docs/ENGINES.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/ENGINES.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # Pluggable Engine Architecture
 
@@ -981,6 +1033,12 @@ Note: The original SQLite engine plan (`docs/SQLITE_ENGINE.md`) was superseded b
 ## docs/GBRAIN_RECOMMENDED_SCHEMA.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_RECOMMENDED_SCHEMA.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 <!-- schema-version: 0.5.0 -->
 <!-- source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_RECOMMENDED_SCHEMA.md -->
@@ -2002,6 +2060,12 @@ The human's job: curate sources, direct analysis, ask good questions, and think 
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/live-sync.md
 
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Live Sync: Keep the Index Current
 
 ## Goal
@@ -2146,6 +2210,12 @@ hashes match. If both a cron and `--watch` fire simultaneously, no conflict.
 ## docs/guides/cron-schedule.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/cron-schedule.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # Reference Cron Schedule
 
@@ -2346,6 +2416,12 @@ echo "Dream cycle complete at $(date)"
 ## docs/guides/minions-deployment.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/minions-deployment.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # Minions Worker Deployment Guide
 
@@ -2686,6 +2762,12 @@ sudo systemctl daemon-reload
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/quiet-hours.md
 
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Quiet Hours and Timezone-Aware Delivery
 
 ## Goal
@@ -2857,6 +2939,12 @@ Set `enabled: false` to disable quiet hours entirely (e.g., for 24/7 monitoring)
 ## docs/mcp/DEPLOY.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/mcp/DEPLOY.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # Deploy GBrain Remote MCP Server
 
@@ -3150,6 +3238,12 @@ built-in server is the recommended path.
 ## docs/GBRAIN_VERIFY.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_VERIFY.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # GBrain Installation Verification Runbook
 
@@ -3451,6 +3545,12 @@ end-to-end sync test (4c), push a real change and verify it appears in search.
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/minions-fix.md
 
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Minions fix — repairing a half-migrated install
 
 **tl;dr:** on v0.11.1+ everything should self-heal. If Minions is partially
@@ -3617,6 +3717,12 @@ Each phase is idempotent. Re-running is safe. Common failure modes:
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/integrations/reliability-repair.md
 
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
+
 # Reliability repair (v0.12.2)
 
 If you ran v0.12.0 on real Postgres or Supabase, two bugs may have corrupted
@@ -3691,6 +3797,12 @@ should match your expectations for the corpus.
 ## docs/UPGRADING_DOWNSTREAM_AGENTS.md
 
 Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/UPGRADING_DOWNSTREAM_AGENTS.md
+
+---
+type: ssot
+owner: governance-team
+last_updated: 2026-09-03
+---
 
 # Upgrading Downstream Agents
 
