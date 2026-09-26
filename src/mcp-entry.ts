@@ -16,6 +16,9 @@ import { startMcpServer } from './mcp/server.js';
 async function main() {
   const baseConfig = loadConfig();
   const engine = await createEngine((baseConfig || {}) as any);
+  // createEngine() only constructs — every tool handler needs a live DB.
+  // Without connect(), tools/call fails with "PGLite not connected".
+  await engine.connect((baseConfig || {}) as any);
   await startMcpServer(engine);
 }
 
