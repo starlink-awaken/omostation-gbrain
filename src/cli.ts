@@ -186,6 +186,13 @@ async function main() {
       const { awaitPendingSearchCacheWrites } = await import('./core/search/hybrid.ts');
       await awaitPendingSearchCacheWrites();
     }
+    // Drain fire-and-forget last_retrieved_at write-backs before the finally
+    // disconnects — racing a live UPDATE deadlocks the single-writer PGLite
+    // engine (search hung at disconnect, never reaching process.exit).
+    {
+      const { awaitPendingRetrievalBumps } = await import('./core/last-retrieved.ts');
+      await awaitPendingRetrievalBumps();
+    }
   } catch (e: unknown) {
     if (e instanceof OperationError) {
       console.error(`Error [${e.code}]: ${e.message}`);
@@ -197,6 +204,11 @@ async function main() {
   } finally {
     await engine.disconnect();
   }
+  // One-shot shared ops must terminate even when a residual handle (PGLite
+  // worker, gateway socket) keeps the event loop alive — subprocess consumers
+  // (MOS live gbrain backend, agent tooling) time out at 30s otherwise.
+  // Success fall-through only: error paths already process.exit(1) above.
+  process.exit(process.exitCode ?? 0);
 }
 
 function hasHelpFlag(args: string[]): boolean {
@@ -1343,6 +1355,12 @@ async function handleCliOnly(command: string, args: string[]) {
   } finally {
     if (command !== 'serve') await engine.disconnect();
   }
+  // One-shot commands must terminate even when a residual handle (PGLite
+  // worker, gateway socket) keeps the event loop alive — subprocess consumers
+  // (MOS live gbrain backend, agent tooling) time out at 30s otherwise.
+  // Reached only on success fall-through: `return` (serve/autopilot) skips
+  // it, and exceptions propagate past it to main().catch → exit 1.
+  if (command !== 'serve') process.exit(process.exitCode ?? 0);
 }
 
 // Build the AIGatewayConfig payload from a GBrainConfig. Both configureGateway
