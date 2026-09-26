@@ -39,6 +39,18 @@ import { isUndefinedColumnError } from './utils.ts';
 let _trackRetrievalCache: { ts: number; enabled: boolean } | null = null;
 const TRACK_RETRIEVAL_CACHE_TTL_MS = 30_000;
 
+// In-flight bump counter — lets the CLI await pending write-backs before
+// engine.disconnect(). Disconnect racing a live UPDATE deadlocks the
+// single-writer PGLite engine (search hung at disconnect indefinitely).
+let _pendingBumps = 0;
+let _drainWaiters: Array<() => void> = [];
+
+/** Resolve once every in-flight bumpLastRetrievedAt write has settled. */
+export async function awaitPendingRetrievalBumps(): Promise<void> {
+  if (_pendingBumps === 0) return;
+  await new Promise<void>((resolve) => _drainWaiters.push(resolve));
+}
+
 /**
  * Resolve `search.track_retrieval` config with a 30s in-process cache so
  * hot-path callers don't pay a SELECT per search. Default-on: missing
@@ -77,6 +89,7 @@ export function _resetTrackRetrievalCacheForTests(): void {
  */
 export function bumpLastRetrievedAt(engine: BrainEngine, pageIds: number[]): void {
   if (pageIds.length === 0) return;
+  _pendingBumps++;
   // Fire-and-forget on purpose. We deliberately do NOT return the promise.
   void (async () => {
     try {
@@ -91,7 +104,7 @@ export function bumpLastRetrievedAt(engine: BrainEngine, pageIds: number[]): voi
            WHERE id = ANY($1::int[])
              AND (last_retrieved_at IS NULL
                   OR last_retrieved_at < NOW() - INTERVAL '5 minutes')`,
-        [pageIds]
+        [pageIds],
       );
     } catch (err) {
       // Pre-v77 brain (column missing) falls through silently — the search
@@ -100,6 +113,14 @@ export function bumpLastRetrievedAt(engine: BrainEngine, pageIds: number[]): voi
       // Other errors: stderr-warn but don't break the op response.
       const msg = err instanceof Error ? err.message : String(err);
       console.warn(`[last-retrieved] write-back failed (best-effort): ${msg}`);
+    } finally {
+      _pendingBumps--;
+      if (_pendingBumps === 0 && _drainWaiters.length > 0) {
+        const waiters = _drainWaiters;
+        _drainWaiters = [];
+        for (const w of waiters) w();
+      }
     }
   })();
 }
+
