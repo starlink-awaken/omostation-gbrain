@@ -475,19 +475,35 @@ export async function scanBrainSources(
     // Codex adversarial #4: also race against the deadline. A wedged Postgres
     // pool can make this await hang past the budget. Without the race, we'd
     // wait indefinitely AND defeat the wall-clock guarantee.
+    //
+    // The timeout leg reports via a sentinel (not wall-clock re-derivation):
+    // the race timer is armed for `remainingMs` computed a few ms AFTER the
+    // absolute deadline, so it can fire while `Date.now()` is still
+    // `<= deadline`. Re-deriving "did we overrun?" from the clock then
+    // flaps between skipped/scanned across machines (CI received 'scanned').
+    // A Symbol sentinel is exact — if the timer leg won, the budget is spent.
+    const COUNT_TIMEOUT = Symbol('count-deadline-timeout');
     let dbPageCount: number | null = null;
+    let countTimedOut = false;
     if (opts.dbPageCountForSource) {
       try {
         if (opts.deadline) {
           const remainingMs = opts.deadline - Date.now();
           if (remainingMs <= 0) {
-            dbPageCount = null;
+            countTimedOut = true;
           } else {
             // Race COUNT against the deadline so a hung query can't eat the budget.
-            dbPageCount = await Promise.race([
+            const raced = await Promise.race([
               opts.dbPageCountForSource(src.id),
-              new Promise<null>(resolve => setTimeout(() => resolve(null), remainingMs)),
+              new Promise<typeof COUNT_TIMEOUT>(resolve =>
+                setTimeout(() => resolve(COUNT_TIMEOUT), remainingMs),
+              ),
             ]);
+            if (raced === COUNT_TIMEOUT) {
+              countTimedOut = true;
+            } else {
+              dbPageCount = raced;
+            }
           }
         } else {
           dbPageCount = await opts.dbPageCountForSource(src.id);
@@ -497,12 +513,12 @@ export async function scanBrainSources(
       }
     }
 
-    // Codex adversarial #2: re-check deadline AFTER the COUNT await. If the
-    // await ate the budget, we must NOT call scanOneSource — it would return
-    // status='partial' with files_scanned=0, which is misleading ("partial
-    // scan" when actually nothing was scanned). Mark this source + remainder
-    // as 'skipped' so the doctor message is honest.
-    if (opts.signal?.aborted || (opts.deadline && Date.now() > opts.deadline)) {
+    // Codex adversarial #2: re-check deadline AFTER the COUNT await (and the
+    // sentinel above). If the await ate the budget, we must NOT call
+    // scanOneSource — it would return status='partial' with files_scanned=0,
+    // which is misleading ("partial scan" when actually nothing was scanned).
+    // Mark this source + remainder as 'skipped' so the doctor message is honest.
+    if (opts.signal?.aborted || countTimedOut || (opts.deadline && Date.now() > opts.deadline)) {
       if (abortedAtSource === null) {
         abortedAtSource = src.id;
       }
