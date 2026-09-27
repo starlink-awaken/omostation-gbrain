@@ -28,7 +28,9 @@ beforeAll(async () => {
   await engine.connect({});
   await engine.initSchema();
   provider = new GBrainOAuthProvider({ sql: sqlQueryForEngine(engine) });
-});
+  // 60s: bun's per-hook default is 5s (bunfig `timeout` covers tests only).
+  // Disk PGLite cold start + 85 migrations runs 5–26s on loaded machines.
+}, 60_000);
 
 afterAll(async () => {
   await engine.disconnect();
