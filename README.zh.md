@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Gbrain
@@ -50,8 +51,8 @@ bun run ci:local
 
     - Developer guide: [`AGENTS.md`](AGENTS.md)
     - AI context loader: [`CLAUDE.md`](CLAUDE.md) when present
-    - Workspace architecture: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
-    - Layer placement: [`../../LAYER-INDEX.md`](../../LAYER-INDEX.md)
+    - Workspace architecture: [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)
+    - Layer placement: [`../../../LAYER-INDEX.md`](../../../LAYER-INDEX.md)
 
 ## 文档
 

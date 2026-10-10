@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Frontmatter scan: DB-backed incremental state (Phase 2 design sketch)

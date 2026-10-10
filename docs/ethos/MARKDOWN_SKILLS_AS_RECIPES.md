@@ -8,6 +8,7 @@ updated: 2026-04-11
 tags: [ai, gbrain, gstack, markdown-is-code, open-source, software-distribution, agents, openclaw]
 status: draft-v2
 prior: "Thin Harness, Fat Skills"
+last-reviewed: 2026-09-18
 ---
 
 # Homebrew for Personal AI

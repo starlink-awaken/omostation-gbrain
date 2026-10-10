@@ -24,6 +24,7 @@ writes_to:
   - deals/
   - concepts/
   - meetings/
+last-reviewed: 2026-09-18
 ---
 
 # Brain Operations — The Ambient Context Layer

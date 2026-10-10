@@ -18,6 +18,7 @@ writes_pages: false
 writes_to:
   - skills/<harvested-slug>/
   - openclaw.plugin.json
+last-reviewed: 2026-09-18
 ---
 
 # skillpack-harvest — Editorial workflow for lifting host skills into gbrain

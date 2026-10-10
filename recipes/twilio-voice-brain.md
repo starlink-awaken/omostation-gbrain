@@ -29,6 +29,7 @@ health_checks:
     label: "OpenAI API"
 setup_time: 30 min
 cost_estimate: "$15-25/mo (Twilio number $1-2 + voice $0.01/min, OpenAI Realtime $0.06/min input + $0.24/min output)"
+last-reviewed: 2026-09-18
 ---
 
 # Voice-to-Brain: Phone Calls That Create Brain Pages
@@ -269,7 +270,7 @@ If using free tier, copy the URL from the ngrok output (changes every restart).
 Note: ngrok runs in the foreground. Run it in a background process or new terminal tab.
 
 The same ngrok account can also serve your GBrain MCP server (see
-[ngrok-tunnel recipe](recipes/ngrok-tunnel.md) for the full multi-service pattern).
+[ngrok-tunnel recipe](ngrok-tunnel.md) for the full multi-service pattern).
 
 ### Step 4: Create Voice Server
 

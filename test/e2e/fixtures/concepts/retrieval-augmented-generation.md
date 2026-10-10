@@ -8,6 +8,7 @@ tags:
   - ai
   - search
   - architecture
+last-reviewed: 2026-09-18
 ---
 
 # Retrieval-Augmented Generation

@@ -3,6 +3,7 @@ title: "On conviction"
 type: essay
 slug: writing/on-conviction
 date: 2026-04-19
+last-reviewed: 2026-09-18
 ---
 
 # On conviction

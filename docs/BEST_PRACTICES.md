@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Best Practices
@@ -23,7 +24,7 @@ last_updated: 2026-09-03
 ## Security
 
 - Never commit secrets or credentials.
-- Report security issues privately per [`SECURITY.md`](SECURITY.md).
+- Report security issues privately per [`SECURITY.md`](../SECURITY.md).
 - Review dependency updates for supply-chain risks.
 
 ## Operations

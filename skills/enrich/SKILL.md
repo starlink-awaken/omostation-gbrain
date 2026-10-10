@@ -24,6 +24,7 @@ writes_pages: true
 writes_to:
   - people/
   - companies/
+last-reviewed: 2026-09-18
 ---
 
 # Enrich Skill

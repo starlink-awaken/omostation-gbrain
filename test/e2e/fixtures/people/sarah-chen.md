@@ -9,6 +9,7 @@ tags:
   - founder
   - yc-w25
   - ai-agents
+last-reviewed: 2026-09-18
 ---
 
 # Sarah Chen

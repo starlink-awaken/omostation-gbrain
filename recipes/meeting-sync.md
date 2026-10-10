@@ -20,6 +20,7 @@ health_checks:
     label: "Circleback API"
 setup_time: 15 min
 cost_estimate: "$0-17/mo (Circleback free for 10 meetings/mo, Pro $17/mo unlimited)"
+last-reviewed: 2026-09-18
 ---
 
 # Meeting Sync: Transcripts That Become Brain Pages

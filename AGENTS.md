@@ -2,12 +2,13 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # AGENTS.md — GBrain
 
     > Scope: project-local developer guide for `gbrain`.
-    > Workspace rules live in [`../../AGENTS.md`](../../AGENTS.md); project metadata lives in [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml).
+    > Workspace rules live in [`../../AGENTS.md`](../../AGENTS.md); project metadata lives in [`../../../docs/project-registry.yaml`](../../../docs/project-registry.yaml).
 
     ## Role
 
@@ -49,7 +50,7 @@ bun run ci:local
 
     ## Verification
 
-    - Documentation-only changes: run `uv run --with "pyyaml" python "../../bin/ssot/doc-ssot-lint.py" --json` from this project or from the workspace root.
+    - Documentation-only changes: run `uv run --with "pyyaml" python "../../../bin/ssot/doc-ssot-lint.py" --json` from this project or from the workspace root.
     - Code changes: run the narrowest relevant project test first, then broaden if shared contracts changed.
     - Cross-layer behavior: verify the caller and the callee, not just the touched module.
 
@@ -58,7 +59,7 @@ bun run ci:local
     - Agent installation: [`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md)
     - Resolver contract: [`skills/RESOLVER.md`](skills/RESOLVER.md)
     - LLM context index: [`llms.txt`](llms.txt)
-    - Workspace architecture: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
-    - Layer index: [`../../LAYER-INDEX.md`](../../LAYER-INDEX.md)
-    - Project metadata: [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml)
-    - Runtime state: [`../../.omo/state/system.yaml`](../../.omo/state/system.yaml)
+    - Workspace architecture: [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)
+    - Layer index: [`../../../LAYER-INDEX.md`](../../../LAYER-INDEX.md)
+    - Project metadata: [`../../../docs/project-registry.yaml`](../../../docs/project-registry.yaml)
+    - Runtime state: [`../../../.omo/state/system.yaml`](../../../.omo/state/system.yaml)

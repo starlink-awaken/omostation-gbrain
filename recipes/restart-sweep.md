@@ -24,6 +24,7 @@ health_checks:
     label: OpenClaw CLI reachable
 setup_time: 10 min
 cost_estimate: "$0 (no per-call cost; runs locally on cron)"
+last-reviewed: 2026-09-18
 ---
 
 # Restart Sweep: Detect Dropped Messages After Gateway Restarts

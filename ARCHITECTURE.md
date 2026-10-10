@@ -2,6 +2,7 @@
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # gbrain — Architecture
@@ -12,7 +13,7 @@ last_updated: 2026-09-03
 > **Health**: See local CI and runtime probes
 > **SSOT**: 运行时健康、测试规模、MCP 能力计数以本项目 CI、本地探针和 workspace governance SSOT 为准
 >
-> 系统全景参见：[`../../docs/PANORAMA.md`](../../docs/PANORAMA.md)
+> 系统全景参见：[`../../../docs/PANORAMA.md`](../../../docs/PANORAMA.md)
 
 ---
 
@@ -59,9 +60,9 @@ graph LR
 ## 4. 测试
 
 ```bash
-cd projects/gbrain && bun test
+cd projects/knowledge/gbrain && bun test
 ```
 
 ## 架构概览
 
-参见工作区架构概览图：[`../../docs/ARCHITECTURE-DIAGRAM.md`](../../docs/ARCHITECTURE-DIAGRAM.md)
+参见工作区架构概览图：[`../../../docs/ARCHITECTURE-DIAGRAM.md`](../../../docs/ARCHITECTURE-DIAGRAM.md)

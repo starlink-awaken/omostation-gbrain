@@ -2,6 +2,7 @@
 name: search-modes
 description: Three named search modes (conservative / balanced / tokenmax). Pick one at install; everything else inherits.
 type: convention
+last-reviewed: 2026-09-18
 ---
 
 # Convention: Search Modes (v0.32.3)

@@ -2,6 +2,7 @@
 type: company
 title: OhMyGreen
 tags: [food-tech, yc, snacks]
+last-reviewed: 2026-09-18
 ---
 
 OhMyGreen is a healthy snack delivery company. They provide curated boxes of healthy

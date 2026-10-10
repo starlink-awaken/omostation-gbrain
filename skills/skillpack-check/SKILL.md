@@ -19,6 +19,7 @@ triggers:
 tools:
   - shell
 mutating: false
+last-reviewed: 2026-09-18
 ---
 
 # Skillpack Check

@@ -32,6 +32,7 @@ mutating: true
 # the word `perplexity` but the skill never actually calls external
 # APIs. It rewrites local routing tables. Declarative opt-out.
 brain_first: exempt
+last-reviewed: 2026-09-18
 ---
 
 # Functional-Area Resolver — Pattern for Compressing Routing Tables

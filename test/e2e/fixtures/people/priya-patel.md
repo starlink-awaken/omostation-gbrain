@@ -4,6 +4,7 @@ title: Priya Patel
 tags:
   - technical
   - ai-research
+last-reviewed: 2026-09-18
 ---
 
 # Priya Patel

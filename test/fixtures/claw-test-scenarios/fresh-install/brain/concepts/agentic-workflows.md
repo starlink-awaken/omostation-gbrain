@@ -1,6 +1,7 @@
 ---
 type: concept
 name: Agentic Workflows
+last-reviewed: 2026-09-18
 ---
 
 # Agentic Workflows
