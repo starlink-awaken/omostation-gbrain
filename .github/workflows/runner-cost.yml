@@ -1,0 +1,21 @@
+name: CR-CI-RUNNER-COST
+
+# macOS 10x / Windows 2x 单价 (Linux 1x)。public 仓标准 runner 免费, private 仓按量 ——
+# 一条未登记的 `runs-on: macos-latest` 就是 10 倍单价。与父仓 omostation 的
+# CR-CI-RUNNER-COST 同一份守门 (bin/gac/check-runner-cost.py, 无父仓 import)。
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  runner-cost:
+    name: runner 成本守门
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pyyaml
+        run: python3 -m pip install --quiet pyyaml
+      - name: Scan workflows for paid OS runners
+        run: python3 bin/gac/check-runner-cost.py
