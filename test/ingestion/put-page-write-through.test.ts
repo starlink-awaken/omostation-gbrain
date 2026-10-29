@@ -15,18 +15,42 @@ import { PGLiteEngine } from '../../src/core/pglite-engine.ts';
 import { resetPgliteState } from '../helpers/reset-pglite.ts';
 import { operations } from '../../src/core/operations.ts';
 import type { OperationContext } from '../../src/core/operations.ts';
+import { getEmbeddingDimensions, __setEmbedTransportForTests } from '../../src/core/ai/gateway.ts';
 
 let engine: PGLiteEngine;
 let tmpRoot: string;
 let brainDir: string;
 
+/**
+ * put_page -> importFromContent -> embedBatch: the default transport calls a
+ * real embedding provider, so this suite used to fail whenever that provider
+ * was unavailable (CI log: `ZeroEntropy inference is unavailable`,
+ * `retry-after: 86400`). Deterministic vectors keep it hermetic.
+ *
+ * Vectors are content-derived so distinct bodies stay distinct — a
+ * constant vector would make the chunk-reuse path match unrelated chunks.
+ */
+function installFakeEmbedTransport(): void {
+  const dims = getEmbeddingDimensions();
+  __setEmbedTransportForTests(async ({ values }: { values: string[] }) => ({
+    embeddings: values.map((text, i) => {
+      let h = (i + 1) * 2654435761;
+      for (let k = 0; k < text.length; k++) h = ((h * 31) ^ text.charCodeAt(k)) >>> 0;
+      return Array.from({ length: dims }, (_, j) => ((h + j) % 997) / 997);
+    }),
+    usage: { tokens: 0 },
+  }) as any);
+}
+
 beforeAll(async () => {
+  installFakeEmbedTransport();
   engine = new PGLiteEngine();
   await engine.connect({});
   await engine.initSchema();
 });
 
 afterAll(async () => {
+  __setEmbedTransportForTests(null);
   await engine.disconnect();
 });
 
