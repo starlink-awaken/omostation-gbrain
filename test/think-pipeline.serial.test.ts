@@ -161,7 +161,7 @@ describe('runThink (with stub client)', () => {
             gaps: ['no info on funding history'],
           }),
         }],
-      }),
+      }) as unknown as Awaited<ReturnType<ThinkLLMClient['create']>>,
     };
 
     const result = await runThink(engine, {
@@ -192,7 +192,7 @@ describe('runThink (with stub client)', () => {
           // No JSON wrapper — just inline citations in prose. Tests the fallback path.
           text: 'Alice [people/alice-example#1] is CEO. Strong [people/alice-example#2].',
         }],
-      }),
+      }) as unknown as Awaited<ReturnType<ThinkLLMClient['create']>>,
     };
 
     const result = await runThink(engine, {
@@ -236,7 +236,7 @@ describe('runThink (with stub client)', () => {
             gaps: [],
           }),
         }],
-      }),
+      }) as unknown as Awaited<ReturnType<ThinkLLMClient['create']>>,
     };
 
     const result = await runThink(engine, { question: 'persist test', client: stubClient });
