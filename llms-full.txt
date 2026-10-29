@@ -15,12 +15,13 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/AGENTS.md
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # AGENTS.md — GBrain
 
     > Scope: project-local developer guide for `gbrain`.
-    > Workspace rules live in [`../../AGENTS.md`](../../AGENTS.md); project metadata lives in [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml).
+    > Workspace rules live in [`../../AGENTS.md`](../../AGENTS.md); project metadata lives in [`../../../docs/project-registry.yaml`](../../../docs/project-registry.yaml).
 
     ## Role
 
@@ -62,7 +63,7 @@ bun run ci:local
 
     ## Verification
 
-    - Documentation-only changes: run `uv run --with "pyyaml" python "../../bin/ssot/doc-ssot-lint.py" --json` from this project or from the workspace root.
+    - Documentation-only changes: run `uv run --with "pyyaml" python "../../../bin/ssot/doc-ssot-lint.py" --json` from this project or from the workspace root.
     - Code changes: run the narrowest relevant project test first, then broaden if shared contracts changed.
     - Cross-layer behavior: verify the caller and the callee, not just the touched module.
 
@@ -71,10 +72,10 @@ bun run ci:local
     - Agent installation: [`INSTALL_FOR_AGENTS.md`](INSTALL_FOR_AGENTS.md)
     - Resolver contract: [`skills/RESOLVER.md`](skills/RESOLVER.md)
     - LLM context index: [`llms.txt`](llms.txt)
-    - Workspace architecture: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
-    - Layer index: [`../../LAYER-INDEX.md`](../../LAYER-INDEX.md)
-    - Project metadata: [`../../docs/project-registry.yaml`](../../docs/project-registry.yaml)
-    - Runtime state: [`../../.omo/state/system.yaml`](../../.omo/state/system.yaml)
+    - Workspace architecture: [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)
+    - Layer index: [`../../../LAYER-INDEX.md`](../../../LAYER-INDEX.md)
+    - Project metadata: [`../../../docs/project-registry.yaml`](../../../docs/project-registry.yaml)
+    - Runtime state: [`../../../.omo/state/system.yaml`](../../../.omo/state/system.yaml)
 
 ---
 
@@ -86,6 +87,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/CLAUDE.md
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # CLAUDE.md — GBrain AI Context
@@ -98,7 +100,7 @@ last_updated: 2026-09-03
     1. [`AGENTS.md`](AGENTS.md)
     2. [`README.md`](README.md) when present
     3. The source files and tests directly related to the task
-    4. Workspace context in [`../../CLAUDE.md`](../../CLAUDE.md) when the task crosses project boundaries
+    4. Workspace context in [`../../../CLAUDE.md`](../../../CLAUDE.md) when the task crosses project boundaries
 
     ## Project Role
 
@@ -129,7 +131,7 @@ bun run ci:local
 
     ```bash
     git status --short
-    uv run --with "pyyaml" python "../../bin/ssot/doc-ssot-lint.py" --json
+    uv run --with "pyyaml" python "../../../bin/ssot/doc-ssot-lint.py" --json
     ```
 
     Report the checks you actually ran and any pre-existing dirty state that remains.
@@ -144,6 +146,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/INSTALL_FOR_AGE
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # GBrain Installation Guide for AI Agents
@@ -433,6 +436,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/skills/RESOLVER
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # GBrain Skill Resolver
@@ -582,6 +586,7 @@ type: derived
 source: projects/knowledge
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # GBrain
@@ -791,6 +796,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/ENGINES.md
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Pluggable Engine Architecture
@@ -1038,6 +1044,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_REC
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 <!-- schema-version: 0.5.0 -->
@@ -2064,6 +2071,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/liv
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Live Sync: Keep the Index Current
@@ -2215,6 +2223,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/cro
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Reference Cron Schedule
@@ -2421,6 +2430,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/min
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Minions Worker Deployment Guide
@@ -2766,6 +2776,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/qui
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Quiet Hours and Timezone-Aware Delivery
@@ -2944,6 +2955,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/mcp/DEPLOY
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Deploy GBrain Remote MCP Server
@@ -3243,6 +3255,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/GBRAIN_VER
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # GBrain Installation Verification Runbook
@@ -3549,6 +3562,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/guides/min
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Minions fix — repairing a half-migrated install
@@ -3721,6 +3735,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/integratio
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Reliability repair (v0.12.2)
@@ -3802,6 +3817,7 @@ Source: https://raw.githubusercontent.com/garrytan/gbrain/master/docs/UPGRADING_
 type: ssot
 owner: governance-team
 last_updated: 2026-09-03
+last-reviewed: 2026-09-18
 ---
 
 # Upgrading Downstream Agents
