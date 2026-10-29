@@ -30,7 +30,7 @@ import {
 } from './types.ts';
 import { contentHash, rowToChunk, rowToPage, rowToSearchResult, validateSlug } from './utils.ts';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
-import { vector } from '@electric-sql/pglite/vector';
+import { vector } from '@electric-sql/pglite-pgvector';
 
 export interface PGLiteEngineLike {
   db: import('@electric-sql/pglite').PGlite;

@@ -40,7 +40,7 @@ import {
   type SalienceResult,
 } from './types.ts';
 import { rowToChunk, takeRowToTake, validateSlug } from './utils.ts';
-import { vector } from '@electric-sql/pglite/vector';
+import { vector } from '@electric-sql/pglite-pgvector';
 
 export interface PGLiteEngineLike {
   db: import('@electric-sql/pglite').PGlite;
