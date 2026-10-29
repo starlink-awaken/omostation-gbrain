@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # Dependabot 的 npm_and_yarn 生态读不了 bun.lock —— 它自己的报错就是
+  # 「Set `package-ecosystem: "bun"` in your dependabot.yml for this directory」。
+  # 在补这份配置之前，Dependabot Updates 每次 run 都红在
+  # `bun is misconfigured` / `npm_and_yarn cannot update bun.lock`。
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
