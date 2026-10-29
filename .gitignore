@@ -37,3 +37,7 @@ __pycache__/
 # ── Runtime artifacts ──
 memu-brain.db*
 test/.cache/
+
+# Test-run scratch (scripts/run-unit-parallel.sh writes here). Tracked by
+# accident until 2026-10-29 — every run dirtied the tree with regenerated logs.
+.context/
