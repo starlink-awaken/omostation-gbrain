@@ -507,7 +507,10 @@ export function makeSubagentHandler(deps: SubagentDeps) {
         cache_read: cacheRead,
       });
 
-      const blocks = assistantMsg.content as ContentBlock[];
+      // Cast through `unknown`: the SDK's ContentBlock union is not a subset of
+      // our structural one (v1.3.0 added ContainerUploadBlock et al., which
+      // carry no index signature), so the direct assertion is rejected.
+      const blocks = assistantMsg.content as unknown as ContentBlock[];
 
       // 3. Persist the assistant message BEFORE tool dispatch so replay
       //    sees a consistent state.
