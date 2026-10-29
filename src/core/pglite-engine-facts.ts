@@ -3,7 +3,7 @@
  * Injected onto PGLiteEngine.prototype via Object.assign.
  */
 import { MAX_SEARCH_LIMIT, clampSearchLimit, type FactInsertStatus, type FactKind, type FactListOpts, type FactRow, type FactVisibility, type FactsHealth, type NewFact } from './engine.ts';
-import { vector } from '@electric-sql/pglite/vector';
+import { vector } from '@electric-sql/pglite-pgvector';
 
 export interface PGLiteEngineLike {
   db: import('@electric-sql/pglite').PGlite;
