@@ -457,6 +457,16 @@ export async function runSkillifyCheckInline(args: string[]): Promise<void> {
     : args.filter(a => !a.startsWith('--'));
 
   if (targets.length === 0) {
+    // Machine-readable callers must get parseable JSON even when there is
+    // nothing to audit — a cold/old checkout has no files whose mtime falls
+    // inside the --recent window. test/skillify-check.test.ts documents this
+    // ("zero files on a cold clone; either way JSON must parse"), and HELP's
+    // exit-code contract ("0 when all REQUIRED items pass") holds vacuously.
+    // The human path keeps exit 1: it means "you gave me nothing to do".
+    if (json) {
+      console.log(JSON.stringify([], null, 2));
+      return;
+    }
     console.error('No targets. Pass a path or --recent.');
     process.exit(1);
   }
