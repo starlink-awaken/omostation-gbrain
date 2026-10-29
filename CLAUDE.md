@@ -27,7 +27,7 @@ last-reviewed: 2026-09-18
 
     ```bash
     bun install
-bun test
+bun run test
 bun run verify
 bun run ci:local
     ```
@@ -35,6 +35,7 @@ bun run ci:local
     ## Safe Editing Rules
 
     - 信任边界是核心：远程 MCP 调用不能获得本地 CLI 权限。
+- 跑测试用 `bun run test`（`scripts/run-unit-parallel.sh`，N 个分片各一个进程），**不要**裸跑 `bun test`。本仓用例不隔离跨文件全局态（`globalThis.fetch`、gateway/transport 单例），单进程跑全量会造出上百个假失败；`*.serial.test.ts` 也必须走分片后的串行段。
 - `测试输出不要通过 tail/head 截断，失败信息必须完整保留。`
 - `版本与发布规则以项目自身 VERSION/package/CHANGELOG 机制为准。`
 
