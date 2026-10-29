@@ -106,7 +106,7 @@
     "heic-decode": "^2.1.0",
     "js-yaml": "^3.14.2",
     "marked": "^18.0.0",
-    "openai": "^4.0.0",
+    "openai": "^7.43.0",
     "pgvector": "^0.2.0",
     "postgres": "^3.4.0",
     "tree-sitter-wasms": "0.1.13",
