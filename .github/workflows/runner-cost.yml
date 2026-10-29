@@ -1,8 +1,8 @@
 name: CR-CI-RUNNER-COST
 
-# macOS 10x / Windows 2x 单价 (Linux 1x)。public 仓标准 runner 免费, private 仓按量 ——
-# 一条未登记的 `runs-on: macos-latest` 就是 10 倍单价。与父仓 omostation 的
-# CR-CI-RUNNER-COST 同一份守门 (bin/gac/check-runner-cost.py, 无父仓 import)。
+# 守的是**覆盖增量**，不是账单：macOS/Windows 腿必须覆盖默认 OS 腿拿不到的东西。
+# 本仓是 public 仓 ⇒ Actions 分钟免费（含 macOS），成本不是这里的理由。
+# 与父仓 omostation 的 CR-CI-RUNNER-COST 同一份守门 (bin/gac/check-runner-cost.py, 无父仓 import)。
 on:
   push:
     branches: [main]
