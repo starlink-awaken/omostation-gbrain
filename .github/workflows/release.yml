@@ -4,6 +4,12 @@ on:
   push:
     tags: ['v*']
 
+# CR-CI-RUNNER-COST: macOS 腿单价 10x，必须有 concurrency 组压住堆叠。
+# 发布流程取 cancel-in-progress: false —— 不中断进行中的构建，只丢弃排队中的重复触发。
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
