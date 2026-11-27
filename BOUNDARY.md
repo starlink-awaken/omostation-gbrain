@@ -22,7 +22,6 @@ status: active
 - `bos://memory/gbrain/query`
 - `bos://memory/gbrain/search`
 - `bos://memory/gbrain/sync`
-- `bos://persona/sharedbrain-bridge/recall`
 
 ### 入口
 
@@ -44,9 +43,9 @@ status: active
 
 ## 4. 配置 / SSOT
 
-- 项目源码：`projects/gbrain/`
-- 入口定义：`projects/gbrain/pyproject.toml` 或 `package.json`
-- 测试：`cd projects/gbrain && bun test`
+- 项目源码：`projects/knowledge/gbrain/`
+- 入口定义：`projects/knowledge/gbrain/package.json`
+- 测试：`cd projects/knowledge/gbrain && bun test`
 
 ## 架构演进与项目边界索引
 
